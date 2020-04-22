@@ -1,0 +1,49 @@
+{
+  "name": "spfetcherbase",
+  "version": "1.0.0",
+  "description": "A container for all requests in a Sharepoint webpart",
+  "author": "Marius Brataas",
+  "license": "MIT",
+  "repository": "github:mariusbrataas/spfetcherbase",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "format": "prettier --write './src/*.ts'",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "prettier": "^2.0.4"
+  },
+  "dependencies": {
+    "typescript": "^3.8.3",
+    "sp-pnp-js": "^3.0.10",
+    "@microsoft/sp-component-base": "^1.10.0"
+  },
+  "prettier": {
+    "arrowParens": "avoid",
+    "bracketSpacing": true,
+    "endOfLine": "lf",
+    "htmlWhitespaceSensitivity": "css",
+    "jsxBracketSameLine": false,
+    "printWidth": 80,
+    "proseWrap": "preserve",
+    "requirePragma": false,
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "none",
+    "useTabs": false,
+    "vueIndentScriptAndStyle": true,
+    "overrides": [
+      {
+        "files": "*.json",
+        "options": {
+          "printWidth": 200
+        }
+      }
+    ]
+  },
+  "files": [
+    "build"
+  ]
+}
