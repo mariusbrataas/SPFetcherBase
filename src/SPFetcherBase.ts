@@ -187,11 +187,11 @@ export class SPFetcherBase {
   }
 
   /**
-   * Utility method: Get all files
+   * Utility method: Auto get parent library
    */
-  public getAllFiles(parent?: string, ...select: string[]) {
+  public getParentLibrary(parent?: string) {
     if (parent) parent = parent.replace(/^\/|\/$/g, '');
-    return (parent
+    return parent
       ? this.web
           .getFolderByServerRelativePath(`/${parent}`)
           .getItem()
@@ -203,13 +203,36 @@ export class SPFetcherBase {
               .slice(1, -1)
           )
           .then(libraryId => this.web.lists.getById(libraryId))
-      : this.getDefaultLibrary()
-    )
+      : this.getDefaultLibrary();
+  }
+
+  /**
+   * Utility method: Get all items of parent
+   */
+  public getAllItems(parent?: string) {
+    if (parent) parent = parent.replace(/^\/|\/$/g, '');
+    return this.getParentLibrary(parent)
       .then(library => library.items)
       .then(items =>
         parent ? items.filter(`substringof('${parent}/',FileRef)`) : items
-      )
-      .then(items => (select ? items.select(...select) : items))
-      .then(items => items.get());
+      );
+  }
+
+  /**
+   * Utility method: Get all files
+   */
+  public getAllFiles(parent?: string) {
+    return this.getAllItems(parent).then(items =>
+      items.filter(`startswith(ContentTypeId,'0x0101')`)
+    );
+  }
+
+  /**
+   * Utility method: Get all folders
+   */
+  public getAllFolders(parent?: string) {
+    return this.getAllItems(parent).then(items =>
+      items.filter(`startswith(ContentTypeId,'0x0120')`)
+    );
   }
 }
