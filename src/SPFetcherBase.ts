@@ -1,8 +1,6 @@
 import pnp, { Web } from 'sp-pnp-js';
 import { BaseComponentContext } from '@microsoft/sp-component-base';
 
-type Context = BaseComponentContext;
-
 /**
  * SPFetcher base
  * A container for all requests in a project.
@@ -60,7 +58,7 @@ type Context = BaseComponentContext;
  */
 export class SPFetcherBase {
   // Properties
-  protected context: Context;
+  protected context: BaseComponentContext;
   protected urls: {
     absolute: string;
   };
@@ -88,12 +86,10 @@ export class SPFetcherBase {
    *
    * @param context
    */
-  public initialize(context: Context): Promise<void> {
+  public initialize(context: BaseComponentContext): Promise<void> {
     return new Promise(resolve => {
       if (this.status === 'initializing') {
-        this.queue.push(function () {
-          this.initialize(context).then(resolve);
-        });
+        this.queue.push(resolve);
       } else {
         this.status = 'initializing';
         pnp.setup({ spfxContext: context });
@@ -156,7 +152,7 @@ export class SPFetcherBase {
   }
 
   /**
-   * Example method: Get default document library id
+   * Utility method: Get default document library id
    * No need to use ready() here because getProperties() takes care of that.
    */
   public getDefaultLibraryId() {
@@ -172,7 +168,7 @@ export class SPFetcherBase {
   }
 
   /**
-   * Example method: Get default documents library
+   * Utility method: Get default documents library
    * No need to use ready() here because getProperties() takes care of that.
    */
   public getDefaultLibrary() {
@@ -182,11 +178,38 @@ export class SPFetcherBase {
   }
 
   /**
-   * Example method: Check whether the user is curently viewing the default library.
+   * Utility method: Check whether the user is curently viewing the default library.
    */
   public isDefaultLibrary() {
     return this.getDefaultLibraryId().then(
       libraryId => libraryId === this.context.pageContext.list.id.toString()
     );
+  }
+
+  /**
+   * Utility method: Get all files
+   */
+  public getAllFiles(parent?: string, ...select: string[]) {
+    if (parent) parent = parent.replace(/^\/|\/$/g, '');
+    return (parent
+      ? this.web
+          .getFolderByServerRelativePath(`/${parent}`)
+          .getItem()
+          .then(item =>
+            item
+              .toUrl()
+              .match(/guid'(.*)Items/g)[0]
+              .match(/'(.*)'/g)[0]
+              .slice(1, -1)
+          )
+          .then(libraryId => this.web.lists.getById(libraryId))
+      : this.getDefaultLibrary()
+    )
+      .then(library => library.items)
+      .then(items =>
+        parent ? items.filter(`substringof('${parent}/',FileRef)`) : items
+      )
+      .then(items => (select ? items.select(...select) : items))
+      .then(items => items.get());
   }
 }

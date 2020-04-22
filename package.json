@@ -1,20 +1,21 @@
 {
   "name": "spfetcherbase",
-  "version": "1.0.0",
+  "version": "1.0.7",
   "description": "A container for all requests in a Sharepoint webpart",
   "author": "Marius Brataas",
   "license": "MIT",
   "repository": "github:mariusbrataas/spfetcherbase",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "main": "dist/SPFetcherBase.js",
+  "types": "dist/SPFetcherBase.d.ts",
+  "module": "commonjs",
   "scripts": {
     "format": "prettier --write './src/*.ts'",
-    "build": "tsc"
+    "build": "tsc",
+    "bump": "npm version patch",
+    "prepublish": "npm run build && npm version patch"
   },
   "devDependencies": {
-    "prettier": "^2.0.4"
-  },
-  "dependencies": {
+    "prettier": "^2.0.4",
     "typescript": "^3.8.3",
     "sp-pnp-js": "^3.0.10",
     "@microsoft/sp-component-base": "^1.10.0"
@@ -44,6 +45,6 @@
     ]
   },
   "files": [
-    "build"
+    "dist"
   ]
 }
