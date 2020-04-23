@@ -212,13 +212,15 @@ export class SPFetcherBase {
   public getAllItems(
     parent?: string,
     contentType?: string,
-    ...select: string[]
+    select?: string | string[],
+    filter?: string | string[]
   ) {
     if (parent) parent = parent.replace(/^\/|\/$/g, '');
     const filters = [
       parent ? `substringof('${parent}/',FileRef)` : undefined,
       contentType ? `startswith(ContentTypeId,'${contentType}')` : undefined
     ]
+      .concat(filter || [])
       .filter(test => test)
       .join(' and ');
     return this.getParentLibrary(parent)
@@ -226,14 +228,18 @@ export class SPFetcherBase {
       .then(items =>
         filters && filters.length ? items.filter(filters) : items
       )
-      .then(items => (select ? items.select(...select) : items));
+      .then(items => (select ? items.select(...[].concat(select)) : items));
   }
 
   /**
    * Utility method: Get all files
    */
-  public getAllFiles(parent?: string, ...select: string[]) {
-    return this.getAllItems(parent, '0x0101', ...select).then(items =>
+  public getAllFiles(
+    parent?: string,
+    select?: string | string[],
+    filter?: string | string[]
+  ) {
+    return this.getAllItems(parent, '0x0101', select, filter).then(items =>
       items.get()
     );
   }
@@ -241,8 +247,12 @@ export class SPFetcherBase {
   /**
    * Utility method: Get all folders
    */
-  public getAllFolders(parent?: string, ...select: string[]) {
-    return this.getAllItems(parent, '0x0120', ...select).then(items =>
+  public getAllFolders(
+    parent?: string,
+    select?: string | string[],
+    filter?: string | string[]
+  ) {
+    return this.getAllItems(parent, '0x0120', select, filter).then(items =>
       items.get()
     );
   }
