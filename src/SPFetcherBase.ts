@@ -209,30 +209,43 @@ export class SPFetcherBase {
   /**
    * Utility method: Get all items of parent
    */
-  public getAllItems(parent?: string) {
+  public getAllItems(
+    parent?: string,
+    only?: 'files' | 'folders',
+    ...select: string[]
+  ) {
     if (parent) parent = parent.replace(/^\/|\/$/g, '');
     return this.getParentLibrary(parent)
       .then(library => library.items)
       .then(items =>
-        parent ? items.filter(`substringof('${parent}/',FileRef)`) : items
-      );
+        parent
+          ? items.filter(
+              `substringof('${parent}/',FileRef)` + only
+                ? ` and startswith(ContentTypeId,'${
+                    only === 'files' ? '0x0101' : '0x0120'
+                  }')`
+                : ''
+            )
+          : items
+      )
+      .then(items => (select ? items.select(...select) : items));
   }
 
   /**
    * Utility method: Get all files
    */
-  public getAllFiles(parent?: string) {
-    return this.getAllItems(parent).then(items =>
-      items.filter(`startswith(ContentTypeId,'0x0101')`)
+  public getAllFiles(parent?: string, ...select: string[]) {
+    return this.getAllItems(parent, 'files', ...select).then(items =>
+      items.get()
     );
   }
 
   /**
    * Utility method: Get all folders
    */
-  public getAllFolders(parent?: string) {
-    return this.getAllItems(parent).then(items =>
-      items.filter(`startswith(ContentTypeId,'0x0120')`)
+  public getAllFolders(parent?: string, ...select: string[]) {
+    return this.getAllItems(parent, 'folders', ...select).then(items =>
+      items.get()
     );
   }
 }
