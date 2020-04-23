@@ -211,22 +211,20 @@ export class SPFetcherBase {
    */
   public getAllItems(
     parent?: string,
-    only?: 'files' | 'folders',
+    contentType?: string,
     ...select: string[]
   ) {
     if (parent) parent = parent.replace(/^\/|\/$/g, '');
+    const filters = [
+      parent ? `substringof('${parent}/',FileRef)` : undefined,
+      contentType ? `startswith(ContentTypeId,'${contentType}')` : undefined
+    ]
+      .filter(test => test)
+      .join(' and ');
     return this.getParentLibrary(parent)
       .then(library => library.items)
       .then(items =>
-        parent
-          ? items.filter(
-              `substringof('${parent}/',FileRef)` + only
-                ? ` and startswith(ContentTypeId,'${
-                    only === 'files' ? '0x0101' : '0x0120'
-                  }')`
-                : ''
-            )
-          : items
+        filters && filters.length ? items.filter(filters) : items
       )
       .then(items => (select ? items.select(...select) : items));
   }
