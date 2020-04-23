@@ -233,7 +233,7 @@ export class SPFetcherBase {
    * Utility method: Get all files
    */
   public getAllFiles(parent?: string, ...select: string[]) {
-    return this.getAllItems(parent, 'files', ...select).then(items =>
+    return this.getAllItems(parent, '0x0101', ...select).then(items =>
       items.get()
     );
   }
@@ -242,7 +242,7 @@ export class SPFetcherBase {
    * Utility method: Get all folders
    */
   public getAllFolders(parent?: string, ...select: string[]) {
-    return this.getAllItems(parent, 'folders', ...select).then(items =>
+    return this.getAllItems(parent, '0x0120', ...select).then(items =>
       items.get()
     );
   }
