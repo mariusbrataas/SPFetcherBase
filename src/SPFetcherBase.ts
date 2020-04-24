@@ -58,13 +58,13 @@ import { BaseComponentContext } from '@microsoft/sp-component-base';
  */
 export class SPFetcherBase {
   // Properties
-  protected context: BaseComponentContext;
+  public context: BaseComponentContext;
   protected urls: {
     absolute: string;
   };
   protected web: Web;
 
-  protected status: 'not initialized' | 'initializing' | 'ready' | 'error';
+  public status: 'not initialized' | 'initializing' | 'ready' | 'error';
   protected queue: (() => void)[];
 
   // Constructor
