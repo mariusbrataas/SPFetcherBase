@@ -213,7 +213,8 @@ export class SPFetcherBase {
     parent?: string,
     contentType?: string,
     select?: string | string[],
-    filter?: string | string[]
+    filter?: string | string[],
+    top?: number
   ) {
     if (parent) parent = parent.replace(/^\/|\/$/g, '');
     const filters = [
@@ -228,7 +229,8 @@ export class SPFetcherBase {
       .then(items =>
         filters && filters.length ? items.filter(filters) : items
       )
-      .then(items => (select ? items.select(...[].concat(select)) : items));
+      .then(items => (select ? items.select(...[].concat(select)) : items))
+      .then(items => (top ? items.top(top) : items));
   }
 
   /**
@@ -237,9 +239,10 @@ export class SPFetcherBase {
   public getAllFiles(
     parent?: string,
     select?: string | string[],
-    filter?: string | string[]
+    filter?: string | string[],
+    top?: number
   ) {
-    return this.getAllItems(parent, '0x0101', select, filter).then(items =>
+    return this.getAllItems(parent, '0x0101', select, filter, top).then(items =>
       items.get()
     );
   }
@@ -250,9 +253,10 @@ export class SPFetcherBase {
   public getAllFolders(
     parent?: string,
     select?: string | string[],
-    filter?: string | string[]
+    filter?: string | string[],
+    top?: number
   ) {
-    return this.getAllItems(parent, '0x0120', select, filter).then(items =>
+    return this.getAllItems(parent, '0x0120', select, filter, top).then(items =>
       items.get()
     );
   }
