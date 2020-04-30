@@ -179,12 +179,29 @@ export class SPFetcherBase {
   }
 
   /**
+   * Utility method: Get current document library id
+   */
+  public getCurrentLibraryId() {
+    return this.ready().then(() => this.context.pageContext.list.id.toString());
+  }
+
+  /**
+   * Utility method: Get current document library
+   */
+  public getCurrentLibrary() {
+    return this.getCurrentLibraryId().then(libraryId =>
+      this.web.lists.getById(libraryId)
+    );
+  }
+
+  /**
    * Utility method: Check whether the user is curently viewing the default library.
    */
   public isDefaultLibrary() {
-    return this.getDefaultLibraryId().then(
-      libraryId => libraryId === this.context.pageContext.list.id.toString()
-    );
+    return Promise.all([
+      this.getDefaultLibraryId(),
+      this.getCurrentLibraryId()
+    ]).then(([defaultId, currentId]) => defaultId === currentId);
   }
 
   /**
