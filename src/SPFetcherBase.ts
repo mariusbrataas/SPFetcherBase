@@ -153,6 +153,7 @@ export class SPFetcherBase {
         )
         .forEach(name => {
           const func = this[name];
+          func.bind(this);
           this[name] = (...args: any[]) => this.addLog(name) && func(...args);
         });
     }
