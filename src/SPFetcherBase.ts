@@ -87,10 +87,7 @@ export class SPFetcherBase {
    * @param context
    * @param logging
    */
-  public initialize(
-    context: BaseComponentContext,
-    logging?: boolean
-  ): Promise<void> {
+  public initialize(context: BaseComponentContext): Promise<void> {
     return new Promise(resolve => {
       if (this.status === 'initializing') {
         this.queue.push(resolve);
@@ -100,7 +97,6 @@ export class SPFetcherBase {
         this.context = context;
         this.urls.absolute = this.context.pageContext.site.absoluteUrl;
         this.web = new Web(this.urls.absolute);
-        if (logging) this.initLogging();
         resolve();
       }
     })
@@ -114,49 +110,6 @@ export class SPFetcherBase {
         this.status = 'error';
         throw error;
       });
-  }
-
-  /**
-   * Add a new entry to the log
-   *
-   * @param title
-   */
-  private addLog(title: string) {
-    if (this.log)
-      this.log.push({
-        title,
-        time: new Date().toISOString().replace(/(T(.*)Z)|[^]/g, '$2')
-      });
-    return true;
-  }
-
-  /**
-   * Initialize logging
-   *
-   * Adds a "middleman" to all class methods, ensuring a new entry with a
-   * timestamp and the title of the method is added to the log whenever the
-   * method is called
-   */
-  private initLogging() {
-    if (this.log === undefined) {
-      this.log = [];
-      Object.getOwnPropertyNames(Object.getPrototypeOf(this))
-        .filter(test =>
-          [
-            'constructor',
-            'initLogging',
-            'initialize',
-            'addLog',
-            'startupRoutines',
-            'ready'
-          ].every(name => name !== test)
-        )
-        .forEach(name => {
-          var func = this[name];
-          func = func.bind(this);
-          this[name] = (...args: any[]) => this.addLog(name) && func(...args);
-        });
-    }
   }
 
   /**
