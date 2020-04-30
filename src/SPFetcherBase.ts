@@ -188,21 +188,24 @@ export class SPFetcherBase {
   }
 
   /**
+   * Utility method: Get item by path
+   */
+  public getItemByPath(path: string) {
+    return this.ready().then(() =>
+      this.web
+        .getFileByServerRelativePath(path)
+        .getItem()
+        .then(item => item)
+    );
+  }
+
+  /**
    * Utility method: Auto get parent library
    */
-  public getParentLibrary(parent?: string) {
-    if (parent) parent = parent.replace(/^\/|\/$/g, '');
-    return parent
-      ? this.web
-          .getFolderByServerRelativePath(`/${parent}`)
-          .getItem()
-          .then(item =>
-            item
-              .toUrl()
-              .match(/guid'(.*)Items/g)[0]
-              .match(/'(.*)'/g)[0]
-              .slice(1, -1)
-          )
+  public getParentLibrary(path?: string) {
+    return path
+      ? this.getItemByPath(path)
+          .then(item => item.toUrl().replace(/^.*guid'(.*)'(.*)/g, '$1'))
           .then(libraryId => this.web.lists.getById(libraryId))
       : this.getDefaultLibrary();
   }
@@ -261,4 +264,9 @@ export class SPFetcherBase {
       items.get()
     );
   }
+
+  /**
+   * Utility method: Get file parent library
+   */
+  public getFileParentLibrary(fileRef: string) {}
 }
