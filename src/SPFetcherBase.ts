@@ -264,9 +264,4 @@ export class SPFetcherBase {
       items.get()
     );
   }
-
-  /**
-   * Utility method: Get file parent library
-   */
-  public getFileParentLibrary(fileRef: string) {}
 }
