@@ -152,8 +152,8 @@ export class SPFetcherBase {
           ].every(name => name !== test)
         )
         .forEach(name => {
-          const func = this[name];
-          func.bind(this);
+          var func = this[name];
+          func = func.bind(this);
           this[name] = (...args: any[]) => this.addLog(name) && func(...args);
         });
     }
