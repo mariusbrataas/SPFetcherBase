@@ -61,6 +61,7 @@ export class SPFetcherBase {
   public context: BaseComponentContext;
   protected urls: {
     absolute: string;
+    base: string;
   };
   protected web: Web;
 
@@ -72,7 +73,8 @@ export class SPFetcherBase {
   // Constructor
   constructor() {
     this.urls = {
-      absolute: undefined
+      absolute: undefined,
+      base: undefined
     };
     this.status = 'not initialized';
     this.queue = [];
@@ -96,6 +98,7 @@ export class SPFetcherBase {
         pnp.setup({ spfxContext: context });
         this.context = context;
         this.urls.absolute = this.context.pageContext.site.absoluteUrl;
+        this.urls.base = this.urls.absolute.match(/(.*).sharepoint.com/)[0];
         this.web = new Web(this.urls.absolute);
         resolve();
       }
