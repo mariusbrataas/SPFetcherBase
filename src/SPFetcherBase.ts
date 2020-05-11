@@ -156,6 +156,20 @@ export class SPFetcherBase {
   }
 
   /**
+   * Utility method: Get list by title
+   */
+  public getListByTitle(title: string) {
+    return this.ready().then(() => this.web.lists.getByTitle(title));
+  }
+
+  /**
+   * Utility method: Get list by id
+   */
+  public getListById(id: string) {
+    return this.ready().then(() => this.web.lists.getById(id));
+  }
+
+  /**
    * Utility method: Get default document library id
    * No need to use ready() here because getProperties() takes care of that.
    */
@@ -193,7 +207,7 @@ export class SPFetcherBase {
    */
   public getCurrentLibrary() {
     return this.getCurrentLibraryId().then(libraryId =>
-      this.web.lists.getById(libraryId)
+      this.getListById(libraryId)
     );
   }
 
