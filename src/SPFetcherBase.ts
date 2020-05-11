@@ -132,7 +132,7 @@ export class SPFetcherBase {
     return new Promise(resolve => {
       if (this.status === 'ready' || this.status === 'initializing') {
         resolve();
-      } else this.queue.push(() => this.ready().then(resolve));
+      } else this.queue.push(resolve);
     });
   }
 
