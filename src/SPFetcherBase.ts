@@ -172,7 +172,7 @@ export class SPFetcherBase {
   /**
    * Utility method: Get fields of a list
    */
-  public getListFields(list: List): Promise<IListField> {
+  public getListFields(list: List): Promise<IListField[]> {
     return list.fields.get();
   }
 
