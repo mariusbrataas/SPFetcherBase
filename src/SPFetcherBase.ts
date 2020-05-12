@@ -1,5 +1,6 @@
-import pnp, { Web } from 'sp-pnp-js';
+import pnp, { Web, List } from 'sp-pnp-js';
 import { BaseComponentContext } from '@microsoft/sp-component-base';
+import { IListField } from './interfaces';
 
 /**
  * SPFetcher base
@@ -87,7 +88,6 @@ export class SPFetcherBase {
    * Put other startup routines in the startupRoutines method. It will be called during init.
    *
    * @param context
-   * @param logging
    */
   public initialize(context: BaseComponentContext): Promise<void> {
     return new Promise(resolve => {
@@ -167,6 +167,27 @@ export class SPFetcherBase {
    */
   public getListById(id: string) {
     return this.ready().then(() => this.web.lists.getById(id));
+  }
+
+  /**
+   * Utility method: Get fields of a list
+   */
+  public getListFields(list: List): Promise<IListField> {
+    return list.fields.get();
+  }
+
+  /**
+   * Utility method: Get all fields in list by id
+   */
+  public getListByIdFields(id: string) {
+    return this.getListById(id).then(list => this.getListFields(list));
+  }
+
+  /**
+   * Utility method: Get all fields in list by name
+   */
+  public getListByTitleFields(title: string) {
+    return this.getListByTitle(title).then(list => this.getListFields(list));
   }
 
   /**

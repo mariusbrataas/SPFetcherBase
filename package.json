@@ -5,8 +5,8 @@
   "author": "Marius Brataas",
   "license": "MIT",
   "repository": "github:mariusbrataas/spfetcherbase",
-  "main": "dist/SPFetcherBase.js",
-  "types": "dist/SPFetcherBase.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "module": "commonjs",
   "scripts": {
     "format": "prettier --write './src/*.ts'",
