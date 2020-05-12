@@ -217,6 +217,38 @@ export class SPFetcherBase {
     return this.getListByTitle(title).then(list => this.getListFields(list));
   }
 
+  public getFieldsInterface(list: List) {
+    return Promise.all([
+      list.get().then(r => (r.Title || 'List').split(' ').join('')),
+      this.getListFields(list)
+        .then(fields =>
+          fields.reduce(
+            (prev, field) => ({
+              ...prev,
+              [field.InternalName]: field['odata.type'].split('.').slice(-1)[0]
+            }),
+            {}
+          )
+        )
+        .then(r =>
+          Object.keys(r)
+            .sort()
+            .map(key => `\n  ${key}: ${r[key]};`)
+            .join('')
+        )
+    ]).then(([name, types]) => `interface I${name}Item {${types}\n}`);
+  }
+
+  public getFieldsInterfaceByListId(id: string) {
+    return this.getListById(id).then(list => this.getFieldsInterface(list));
+  }
+
+  public getFieldsInterfaceByListTitle(title: string) {
+    return this.getListByTitle(title).then(list =>
+      this.getFieldsInterface(list)
+    );
+  }
+
   /**
    * Utility method: Get default document library id
    * No need to use ready() here because getProperties() takes care of that.
