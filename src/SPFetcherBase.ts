@@ -206,14 +206,14 @@ export class SPFetcherBase {
   /**
    * Utility method: Get all fields in list by id
    */
-  public getListByIdFields(id: string) {
+  public getFieldsByListId(id: string) {
     return this.getListById(id).then(list => this.getListFields(list));
   }
 
   /**
    * Utility method: Get all fields in list by name
    */
-  public getListByTitleFields(title: string) {
+  public getFieldsByListTitle(title: string) {
     return this.getListByTitle(title).then(list => this.getListFields(list));
   }
 
