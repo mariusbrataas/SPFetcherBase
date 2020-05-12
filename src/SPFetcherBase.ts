@@ -60,13 +60,15 @@ import { IListField } from './interfaces';
 export class SPFetcherBase {
   // Properties
   public context: BaseComponentContext;
+
   protected urls: {
     absolute: string;
     base: string;
   };
-  protected web: Web;
+  protected lists: {};
+  protected termsets: {};
 
-  public log: Array<{ time: string; title: string }>;
+  protected web: Web;
 
   public status: 'not initialized' | 'initializing' | 'ready' | 'error';
   protected queue: (() => void)[];
@@ -77,6 +79,8 @@ export class SPFetcherBase {
       absolute: undefined,
       base: undefined
     };
+    this.lists = {};
+    this.termsets = {};
     this.status = 'not initialized';
     this.queue = [];
   }
@@ -99,8 +103,9 @@ export class SPFetcherBase {
         this.context = context;
         this.urls.absolute = this.context.pageContext.site.absoluteUrl;
         this.urls.base = this.urls.absolute.match(/(.*).sharepoint.com/)[0];
-        this.web = new Web(this.urls.absolute);
-        resolve();
+        this.getWeb()
+          .then(web => (this.web = web))
+          .then(() => resolve());
       }
     })
       .then(() => this.startupRoutines())
@@ -147,12 +152,34 @@ export class SPFetcherBase {
   }
 
   /**
+   * Get a new web object.
+   * If the argument is "base" the base url will be used.
+   *
+   * @param base
+   */
+  public getWeb(base?: string) {
+    return this.ready().then(() =>
+      base
+        ? new Web(base === 'base' ? this.urls.base : base)
+        : this.web || new Web(this.urls.absolute)
+    );
+  }
+
+  /**
    * Utility method: Get all properties
    */
   public getProperties(): Promise<any> {
     return this.ready().then(() =>
       this.web.select('AllProperties').expand('AllProperties').get()
     );
+  }
+
+  /**
+   * Utility method: Get storage entity
+   * @param entity
+   */
+  public getStorageEntity(entity: string) {
+    return this.ready().then(() => this.web.getStorageEntity(entity));
   }
 
   /**
