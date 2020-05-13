@@ -11,13 +11,12 @@
   "scripts": {
     "format": "prettier --write './src/*.ts'",
     "build": "tsc",
-    "bump": "npm version patch",
-    "prepublish": "npm run build && npm version patch"
+    "bump": "npm version patch"
   },
   "devDependencies": {
+    "@pnp/sp": "^2.0.5",
     "prettier": "^2.0.4",
     "typescript": "^3.8.3",
-    "sp-pnp-js": "^3.0.10",
     "@microsoft/sp-component-base": "^1.10.0"
   },
   "prettier": {
