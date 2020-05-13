@@ -164,9 +164,7 @@ export class SPFetcherBase {
    */
   public getWeb(base?: string) {
     return this.ready().then(() =>
-      base
-        ? Web(base === 'base' ? this.urls.base : base)
-        : this.web || Web(this.urls.absolute)
+      base ? Web(base === 'base' ? this.urls.base : base) : this.web || sp.web
     );
   }
 
@@ -205,7 +203,7 @@ export class SPFetcherBase {
    * Utility method: Get fields of a list
    */
   public getListFields(list: IList): Promise<IListField[]> {
-    return list.relatedFields.get();
+    return list.fields();
   }
 
   /**
