@@ -11,7 +11,8 @@
   "scripts": {
     "format": "prettier --write './src/*.ts'",
     "build": "rm -rf dist && tsc",
-    "bump": "npm version patch"
+    "bump": "npm version patch",
+    "prepublish": "npm run build"
   },
   "devDependencies": {
     "@pnp/sp": "^2.0.5",
