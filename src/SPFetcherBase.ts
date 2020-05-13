@@ -164,7 +164,9 @@ export class SPFetcherBase {
    */
   public getWeb(base?: string) {
     return this.ready().then(() =>
-      base ? Web(base === 'base' ? this.urls.base : base) : this.web || sp.web
+      base
+        ? Web(base === 'base' ? this.urls.base : base)
+        : this.web || Web(this.urls.absolute)
     );
   }
 
