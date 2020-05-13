@@ -1,9 +1,9 @@
 import { sp } from '@pnp/sp';
 import { Web, IWeb } from '@pnp/sp/webs';
-import '@pnp/sp/lists/web';
-import '@pnp/sp/files/web';
-import '@pnp/sp/folders/web';
-import '@pnp/sp/fields/web';
+import '@pnp/sp/lists';
+import '@pnp/sp/files';
+import '@pnp/sp/folders';
+import '@pnp/sp/fields';
 import { BaseComponentContext } from '@microsoft/sp-component-base';
 import { IListField } from './interfaces';
 import { IList } from '@pnp/sp/lists';
