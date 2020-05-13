@@ -206,17 +206,26 @@ export class SPFetcherBase {
   /**
    * Utility method: Get all fields in list by id
    */
-  public getFieldsByListId(id: string) {
-    return this.getListById(id).then(list => this.getListFields(list));
+  public getFieldsByListId(...ids: string[]) {
+    return Promise.all(
+      ids.map(id => this.getListById(id).then(list => this.getListFields(list)))
+    ).then(r => r.reduce((prev, fields) => prev.concat(fields), []));
   }
 
   /**
    * Utility method: Get all fields in list by name
    */
-  public getFieldsByListTitle(title: string) {
-    return this.getListByTitle(title).then(list => this.getListFields(list));
+  public getFieldsByListTitle(...titles: string[]) {
+    return Promise.all(
+      titles.map(title =>
+        this.getListByTitle(title).then(list => this.getListFields(list))
+      )
+    ).then(r => r.reduce((prev, fields) => prev.concat(fields), []));
   }
 
+  /**
+   * Utility method: Get interface for list
+   */
   public getFieldsInterface(list: List) {
     return Promise.all([
       list.get().then(r => (r.Title || 'List').split(' ').join('')),
@@ -239,14 +248,20 @@ export class SPFetcherBase {
     ]).then(([name, types]) => `interface I${name}Item {${types}\n}`);
   }
 
-  public getFieldsInterfaceByListId(id: string) {
-    return this.getListById(id).then(list => this.getFieldsInterface(list));
+  public getFieldsInterfaceByListId(...ids: string[]) {
+    return Promise.all(
+      ids.map(id =>
+        this.getListById(id).then(list => this.getFieldsInterface(list))
+      )
+    ).then(r => r.join('\n\n'));
   }
 
-  public getFieldsInterfaceByListTitle(title: string) {
-    return this.getListByTitle(title).then(list =>
-      this.getFieldsInterface(list)
-    );
+  public getFieldsInterfaceByListTitle(...titles: string[]) {
+    return Promise.all(
+      titles.map(title =>
+        this.getListByTitle(title).then(list => this.getFieldsInterface(list))
+      )
+    ).then(r => r.join('\n\n'));
   }
 
   /**
