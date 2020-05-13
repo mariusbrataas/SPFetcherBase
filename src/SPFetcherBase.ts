@@ -1,12 +1,11 @@
-import { sp } from '@pnp/sp';
-import { Web, IWeb } from '@pnp/sp/webs';
-import '@pnp/sp/lists';
-import '@pnp/sp/files';
-import '@pnp/sp/folders';
-import '@pnp/sp/fields';
+import { sp, Web, IWeb, IList } from '@pnp/sp/presets/all';
+// import '@pnp/sp/webs';
+// import '@pnp/sp/lists';
+// import '@pnp/sp/files';
+// import '@pnp/sp/folders';
+// import '@pnp/sp/fields';
 import { BaseComponentContext } from '@microsoft/sp-component-base';
 import { IListField } from './interfaces';
-import { IList } from '@pnp/sp/lists';
 
 /**
  * SPFetcher base
