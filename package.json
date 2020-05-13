@@ -10,7 +10,7 @@
   "module": "commonjs",
   "scripts": {
     "format": "prettier --write './src/*.ts'",
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "bump": "npm version patch"
   },
   "devDependencies": {
