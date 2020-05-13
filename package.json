@@ -12,7 +12,7 @@
     "format": "prettier --write './src/*.ts'",
     "build": "rm -rf dist && tsc",
     "bump": "npm version patch",
-    "prepublish": "npm run build"
+    "prepublish": "npm run bump && npm run build"
   },
   "devDependencies": {
     "@pnp/sp": "^2.0.5",
