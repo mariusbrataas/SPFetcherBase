@@ -12,7 +12,7 @@
     "format": "prettier --write './src/*.ts'",
     "build": "rm -rf dist && tsc",
     "bump": "npm version patch",
-    "prepublish": "npm run bump && npm run build"
+    "prepublishOnly": "npm run bump && npm run build"
   },
   "devDependencies": {
     "@pnp/sp": "^2.0.5",
@@ -46,5 +46,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "dependencies": {
+    "@microsoft/sp-http": "^1.10.0"
+  }
 }

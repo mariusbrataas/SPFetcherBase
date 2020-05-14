@@ -1,3 +1,5 @@
+import { IFieldInfo } from '@pnp/sp/fields';
+
 export interface IListFields {
   FieldChoice: FieldChoice;
   FieldComputed: FieldComputed;
@@ -12,45 +14,7 @@ export interface IListFields {
 
 export type IListField = IListFields[keyof IListFields];
 
-export interface Field {
-  AutoIndexed: boolean;
-  CanBeDeleted: boolean;
-  ClientSideComponentId: string;
-  ClientSideComponentProperties: any;
-  ClientValidationFormula: any;
-  ClientValidationMessage: any;
-  CustomFormatter: any;
-  DefaultFormula: any;
-  DefaultValue: string;
-  Description: string;
-  Direction: string;
-  EnforceUniqueValues: boolean;
-  EntityPropertyName: string;
-  FieldTypeKind: number;
-  Filterable: boolean;
-  FromBaseType: boolean;
-  Group: string;
-  Hidden: boolean;
-  Id: string;
-  IndexStatus: number;
-  Indexed: boolean;
-  InternalName: string;
-  JSLink: string;
-  PinnedToFiltersPane: boolean;
-  ReadOnlyField: boolean;
-  Required: boolean;
-  SchemaXml: string;
-  Scope: string;
-  Sealed: boolean;
-  ShowInFiltersPane: number;
-  Sortable: boolean;
-  StaticName: string;
-  Title: string;
-  TypeAsString: string;
-  TypeDisplayName: string;
-  TypeShortDescription: string;
-  ValidationFormula: any;
-  ValidationMessage: any;
+export interface Field extends IFieldInfo {
   'odata.editLink': string;
   'odata.id': string;
 }

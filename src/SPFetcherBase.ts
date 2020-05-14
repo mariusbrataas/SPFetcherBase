@@ -1,10 +1,10 @@
 import { sp, Web, IWeb, IList } from '@pnp/sp/presets/all';
-// import '@pnp/sp/webs';
-// import '@pnp/sp/lists';
-// import '@pnp/sp/files';
-// import '@pnp/sp/folders';
-// import '@pnp/sp/fields';
 import { BaseComponentContext } from '@microsoft/sp-component-base';
+import {
+  SPHttpClient,
+  ISPHttpClientOptions,
+  SPHttpClientConfiguration
+} from '@microsoft/sp-http';
 import { IListField } from './interfaces';
 
 /**
@@ -154,6 +154,48 @@ export class SPFetcherBase {
    */
   protected startupRoutines(): Promise<any> {
     return Promise.all([]);
+  }
+
+  /**
+   * Utility method: Perform a fetch-request using the spHttpClient
+   */
+  public fetch(
+    url: string,
+    options?: ISPHttpClientOptions,
+    config: SPHttpClientConfiguration = SPHttpClient.configurations.v1,
+    method: 'get' | 'post' = 'get'
+  ) {
+    return this.ready().then(() =>
+      this.context.spHttpClient[method](
+        url.startsWith('https://')
+          ? url
+          : `${this.urls.base}/${url.replace(/^\/+/g, '')}`,
+        config,
+        options
+      )
+    );
+  }
+
+  /**
+   * Utility method: Perform a get-request using the spHttpClient
+   */
+  public get(
+    url: string,
+    options?: ISPHttpClientOptions,
+    config: SPHttpClientConfiguration = SPHttpClient.configurations.v1
+  ) {
+    return this.fetch(url, options, config, 'get');
+  }
+
+  /**
+   * Utility method: Perform a post-request using the spHttpClient
+   */
+  public post(
+    url: string,
+    options?: ISPHttpClientOptions,
+    config: SPHttpClientConfiguration = SPHttpClient.configurations.v1
+  ) {
+    return this.fetch(url, options, config, 'post');
   }
 
   /**
