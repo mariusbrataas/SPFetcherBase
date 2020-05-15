@@ -1,5 +1,53 @@
 import { IFieldInfo } from '@pnp/sp/fields';
 
+export interface ITerm {
+  CustomSortOrder: any;
+  Id: string;
+  IsAvailableForTagging: boolean;
+  IsDeprecated: boolean;
+  IsRoot: boolean;
+  Labels: {
+    _ObjectType_: string;
+    _Child_Items_: {
+      _ObjectType_: string;
+      _ObjectIdentity_: string;
+      IsDefaultForLanguage: boolean;
+      Language: number;
+      Value: string;
+    }[];
+  };
+  LocalCustomProperties: any;
+  Name: string;
+  Parent: {
+    _ObjectType_: string;
+    _ObjectIdentity_: string;
+    CreatedDate: string;
+    Id: string;
+    LastModifiedDate: string;
+    Name: string;
+    CustomProperties: any;
+    CustomSortOrder: any;
+    IsAvailableForTagging: boolean;
+    Owner: string;
+    Description: string;
+    IsDeprecated: boolean;
+    IsKeyword: boolean;
+    IsPinned: boolean;
+    IsPinnedRoot: boolean;
+    IsReused: boolean;
+    IsRoot: boolean;
+    IsSourceTerm: boolean;
+    LocalCustomProperties: any;
+    MergedTermIds: any[];
+    PathOfTerm: string;
+    TermsCount: number;
+  };
+  PathOfTerm: string;
+  TermsCount: number;
+  _ObjectIdentity_: string;
+  _ObjectType_: string;
+}
+
 export interface IListFields {
   FieldChoice: FieldChoice;
   FieldComputed: FieldComputed;

@@ -1,11 +1,11 @@
-import { sp, Web, IWeb, IList } from '@pnp/sp/presets/all';
+import { sp, Web, IWeb, IList, IField } from '@pnp/sp/presets/all';
 import { BaseComponentContext } from '@microsoft/sp-component-base';
 import {
   SPHttpClient,
   ISPHttpClientOptions,
   SPHttpClientConfiguration
 } from '@microsoft/sp-http';
-import { IListField } from './interfaces';
+import { IListField, FieldLookup, ITerm, TaxonomyField } from './interfaces';
 
 /**
  * SPFetcher base
@@ -309,6 +309,204 @@ export class SPFetcherBase {
         this.getListByTitle(title).then(list => this.getFieldsInterface(list))
       )
     ).then(r => r.join('\n\n'));
+  }
+
+  /**
+   * Utility method: Get reference to field by id
+   */
+  public getFieldById(id: string) {
+    return this.ready().then(() => this.web.fields.getById(id));
+  }
+
+  /**
+   * Utility method: Get reference to field by title
+   */
+  public getFieldByTitle(title: string) {
+    return this.ready().then(() => this.web.fields.getByTitle(title));
+  }
+
+  /**
+   * Utility method: Get reference to the relevant field's lookup list
+   */
+  public getFieldLookup(field: IField) {
+    return field.get().then((r: FieldLookup) => this.getListById(r.LookupList));
+  }
+
+  /**
+   * Utility method: Get reference to relevant lookup list by field id
+   */
+  public getLookupByFieldId(id: string) {
+    return this.getFieldById(id).then(field => this.getFieldLookup(field));
+  }
+
+  /**
+   * Utility method: Get reference to relevant lookup list by field title
+   */
+  public getLookupByFieldTitle(title: string) {
+    return this.getFieldByTitle(title).then(field =>
+      this.getFieldLookup(field)
+    );
+  }
+
+  /**
+   * Utility method: Get all fields of a taxonomy termset
+   */
+  public getTermsetById(id: string) {
+    return this.post(`${this.urls.absolute}/_vti_bin/client.svc/ProcessQuery`, {
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/xml'
+      },
+      body: `<Request xmlns="http://schemas.microsoft.com/sharepoint/clientquery/2009" SchemaVersion="15.0.0.0" LibraryVersion="16.0.0.0" ApplicationName="Javascript Library"><Actions><ObjectPath Id="1" ObjectPathId="0" /><ObjectIdentityQuery Id="2" ObjectPathId="0" /><ObjectPath Id="4" ObjectPathId="3" /><ObjectIdentityQuery Id="5" ObjectPathId="3" /><ObjectPath Id="7" ObjectPathId="6" /><ObjectIdentityQuery Id="8" ObjectPathId="6" /><ObjectPath Id="10" ObjectPathId="9" /><Query Id="11" ObjectPathId="6"><Query SelectAllProperties="true"><Properties /></Query></Query><Query Id="12" ObjectPathId="9"><Query SelectAllProperties="false"><Properties /></Query><ChildItemQuery SelectAllProperties="false"><Properties><Property Name="IsRoot" SelectAll="true" /><Property Name="Labels" SelectAll="true" /><Property Name="TermsCount" SelectAll="true" /><Property Name="CustomSortOrder" SelectAll="true" /><Property Name="Id" SelectAll="true" /><Property Name="Name" SelectAll="true" /><Property Name="PathOfTerm" SelectAll="true" /><Property Name="Parent" SelectAll="true" /><Property Name="LocalCustomProperties" SelectAll="true" /><Property Name="IsDeprecated" ScalarProperty="true" /><Property Name="IsAvailableForTagging" ScalarProperty="true" /></Properties></ChildItemQuery></Query></Actions><ObjectPaths><StaticMethod Id="0" Name="GetTaxonomySession" TypeId="{981cbc68-9edc-4f8d-872f-71146fcbb84f}" /><Method Id="3" ParentId="0" Name="GetDefaultKeywordsTermStore" /><Method Id="6" ParentId="3" Name="GetTermSet"><Parameters><Parameter Type="Guid">${id}</Parameter></Parameters></Method><Method Id="9" ParentId="6" Name="GetAllTerms" /></ObjectPaths></Request>`
+    })
+      .then(r => r.json())
+      .then(
+        r =>
+          r.filter(
+            (test: any) => test._ObjectType_ === 'SP.Taxonomy.TermCollection'
+          )[0]._Child_Items_ as ITerm[]
+      )
+      .then(r => {
+        r.forEach(term => {
+          term.Id = term.Id.replace(/^.*Guid\((.*)\)(.*)/g, '$1');
+          if (term.Parent)
+            term.Parent.Id = term.Parent.Id.replace(
+              /^.*Guid\((.*)\)(.*)/g,
+              '$1'
+            );
+        });
+        return r;
+      });
+  }
+
+  /**
+   * Helper method: Get the taxonomy node closest to the requested path
+   * @param termset_id
+   * @param new_path
+   */
+  private getTaxonomyClosestParent(termset_id: string, new_path: string) {
+    const split_path = new_path.split(';');
+    return this.getTermsetById(termset_id).then(
+      r =>
+        r.reduce(
+          ([highscore, highterm], term) => {
+            const score = split_path.reduce(
+              (score, _, idx) =>
+                split_path.slice(0, idx + 1).join(';') === term.PathOfTerm
+                  ? idx
+                  : score,
+              -1
+            );
+            return score > highscore ? [score, term] : [highscore, highterm];
+          },
+          [-1, undefined]
+        ) as [number, ITerm]
+    );
+  }
+
+  /**
+   * Helper method: Add a new node to taxonomy
+   * @param sspid
+   * @param termset_id
+   * @param new_name
+   * @param parent_term
+   */
+  private addTaxonomyItem(
+    sspid: string,
+    termset_id: string,
+    new_name: string,
+    parent_term: Pick<ITerm, 'Id' | 'IsRoot'>
+  ) {
+    return this.post(
+      '_vti_bin/taxonomyinternalservice.json/CreateTaxonomyItem',
+      {
+        body: JSON.stringify({
+          sspId: sspid,
+          lcid: 1033,
+          parentType: parent_term.IsRoot ? 3 : 4,
+          webId: '00000000-0000-0000-0000-000000000000',
+          listId: '00000000-0000-0000-0000-000000000000',
+          parentId: parent_term.Id,
+          termsetId: termset_id,
+          newName: new_name
+        })
+      }
+    );
+  }
+
+  /**
+   * Helper method: Build entire taxonomy path
+   * @param sspid
+   * @param termset_id
+   * @param new_path
+   * @param prev_name
+   */
+  public buildTaxonomyPath(
+    sspid: string,
+    termset_id: string,
+    new_path: string,
+    prev_name: string = ''
+  ): Promise<boolean> {
+    const path = new_path;
+    const split_path = path.split(';');
+    return this.getTaxonomyClosestParent(termset_id, new_path).then(
+      ([highscore, term]) => {
+        const new_name = split_path[highscore + 1];
+        if (prev_name === new_name)
+          throw new Error(
+            `Failed to add '${new_name}' to termset. termsetId: ${termset_id}, sspid: ${sspid}`
+          );
+        return new_name
+          ? new_name === prev_name
+            ? null
+            : this.addTaxonomyItem(
+                sspid,
+                termset_id,
+                new_name,
+                term
+                  ? { ...term, IsRoot: false }
+                  : { Id: termset_id, IsRoot: true }
+              ).then(() =>
+                this.buildTaxonomyPath(sspid, termset_id, new_path, new_name)
+              )
+          : true;
+      }
+    );
+  }
+
+  /**
+   * Utility method: Build taxonomy path at termset related to field
+   * @param field
+   * @param new_path
+   */
+  public buildTaxonomyPathByField(field: IField, new_path: string) {
+    return field
+      .get()
+      .then((field: TaxonomyField) =>
+        this.buildTaxonomyPath(field.SspId, field.TermSetId, new_path)
+      );
+  }
+
+  /**
+   * Utility method: Build taxonomy path at termset related to field by field id
+   * @param id
+   * @param new_path
+   */
+  public buildTaxonomyPathByFieldId(id: string, new_path: string) {
+    return this.getFieldById(id).then(field =>
+      this.buildTaxonomyPathByField(field, new_path)
+    );
+  }
+
+  /**
+   * Utility method: Build taxonomy path at termset related to field by field title
+   * @param title
+   * @param new_path
+   */
+  public buildTaxonomyPathByFieldTitle(title: string, new_path: string) {
+    return this.getFieldByTitle(title).then(field =>
+      this.buildTaxonomyPathByField(field, new_path)
+    );
   }
 
   /**
