@@ -405,72 +405,65 @@ export class SPFetcherBase {
   }
 
   /**
-   * Helper method: Add a new node to taxonomy
+   * Helper method: Recursively add path to taxonomy termset
    * @param sspid
    * @param termset_id
-   * @param new_name
-   * @param parent_term
+   * @param parent_id
+   * @param path
    */
-  private addTaxonomyItem(
+  private addTaxonomyPath(
     sspid: string,
     termset_id: string,
-    new_name: string,
-    parent_term: Pick<ITerm, 'Id' | 'IsRoot'>
-  ) {
-    return this.post(
-      '_vti_bin/taxonomyinternalservice.json/CreateTaxonomyItem',
-      {
-        body: JSON.stringify({
-          sspId: sspid,
-          lcid: 1033,
-          parentType: parent_term.IsRoot ? 3 : 4,
-          webId: '00000000-0000-0000-0000-000000000000',
-          listId: '00000000-0000-0000-0000-000000000000',
-          parentId: parent_term.Id,
-          termsetId: termset_id,
-          newName: new_name
-        })
-      }
+    parent_id: string,
+    ...path: string[]
+  ): Promise<string> {
+    return this.ready().then(() =>
+      path.length
+        ? this.post(
+            '_vti_bin/taxonomyinternalservice.json/CreateTaxonomyItem',
+            {
+              body: JSON.stringify({
+                sspId: sspid,
+                lcid: 1033,
+                parentType: termset_id === parent_id ? 3 : 4,
+                webId: '00000000-0000-0000-0000-000000000000',
+                listId: '00000000-0000-0000-0000-000000000000',
+                parentId: parent_id,
+                termsetId: termset_id,
+                newName: path[0]
+              })
+            }
+          )
+            .then(r => r.json())
+            .then(r =>
+              this.addTaxonomyPath(
+                sspid,
+                termset_id,
+                r.d.Content.Id,
+                ...path.slice(1)
+              )
+            )
+        : parent_id
     );
   }
 
-  /**
-   * Helper method: Build entire taxonomy path
-   * @param sspid
-   * @param termset_id
-   * @param new_path
-   * @param prev_name
-   */
   public buildTaxonomyPath(
     sspid: string,
     termset_id: string,
-    new_path: string,
-    prev_name: string = ''
-  ): Promise<boolean> {
+    new_path: string
+  ) {
     const path = new_path;
     const split_path = path.split(';');
-    return this.getTaxonomyClosestParent(termset_id, new_path).then(
-      ([highscore, term]) => {
-        const new_name = split_path[highscore + 1];
-        if (prev_name === new_name)
-          throw new Error(
-            `Failed to add '${new_name}' to termset. termsetId: ${termset_id}, sspid: ${sspid}`
-          );
-        return new_name
-          ? new_name === prev_name
-            ? null
-            : this.addTaxonomyItem(
-                sspid,
-                termset_id,
-                new_name,
-                term
-                  ? { ...term, IsRoot: false }
-                  : { Id: termset_id, IsRoot: true }
-              ).then(() =>
-                this.buildTaxonomyPath(sspid, termset_id, new_path, new_name)
-              )
-          : true;
-      }
+    return this.getTaxonomyClosestParent(
+      termset_id,
+      new_path
+    ).then(([highscore, term]) =>
+      this.addTaxonomyPath(
+        sspid,
+        termset_id,
+        (term && term.Id) || termset_id,
+        ...split_path.slice(highscore + 1)
+      )
     );
   }
 
