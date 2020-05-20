@@ -98,7 +98,7 @@ export class SPFetcherBase {
    *
    * @param context
    */
-  public initialize(context: BaseComponentContext): Promise<void> {
+  public initialize(context: BaseComponentContext) {
     return new Promise(resolve => {
       if (this.status === 'initializing') {
         this.queue.push(resolve);
@@ -114,10 +114,11 @@ export class SPFetcherBase {
       }
     })
       .then(() => this.startupRoutines())
-      .then(() => (this.status = 'ready'))
-      .then(() => {
+      .then(r => {
+        this.status = 'ready';
         this.queue.forEach(callback => callback());
         this.queue = [];
+        return r;
       })
       .catch((error: Error) => {
         this.status = 'error';
