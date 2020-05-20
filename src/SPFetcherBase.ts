@@ -507,10 +507,10 @@ export class SPFetcherBase {
    * No need to use ready() here because getProperties() takes care of that.
    */
   public getDefaultLibraryId() {
-    return this.getProperties()
-      .then(
-        r => r.AllProperties && (r.AllProperties.GroupDocumentsListId as string)
-      )
+    return this.web.defaultDocumentLibrary
+      .select('Id')
+      .get()
+      .then(r => r.Id)
       .then(libraryId => {
         if (libraryId) {
           return libraryId;
