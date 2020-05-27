@@ -148,10 +148,9 @@ export class SPFetcherBase {
   }
 
   /**
-   * Custom startup routines.
-   * Put all your startup routines here.
-   * This method will be called by the initializer after basic setup, but before
-   * tasks in the queue are executed.
+   * Startup routines
+   * This method will be called during fetcher initialization, before tasks in
+   * the queue (i.e. tasks that called .ready() before initialization) are executed.
    */
   protected startupRoutines(): Promise<any> {
     return Promise.all([]);
@@ -200,16 +199,26 @@ export class SPFetcherBase {
   }
 
   /**
+   * Set the absolute url to be used by the current fetcher instance.
+   *
+   * @param url
+   */
+  public setAbsolute(url?: string) {
+    this.urls.absolute = url || this.context.pageContext.site.absoluteUrl;
+    return this.getWeb(this.urls.absolute).then(web => (this.web = web));
+  }
+
+  /**
    * Get a new web object.
    * If the argument is "base" the base url will be used.
    *
-   * @param base
+   * @param url
    */
-  public getWeb(base?: string) {
+  public getWeb(url?: string) {
     return this.ready().then(() =>
-      base
-        ? Web(base === 'base' ? this.urls.base : base)
-        : this.web || Web(this.urls.absolute)
+      url
+        ? Web(url === 'base' ? this.urls.base : url)
+        : Web(this.context.pageContext.site.absoluteUrl)
     );
   }
 
@@ -254,21 +263,15 @@ export class SPFetcherBase {
   /**
    * Utility method: Get all fields in list by id
    */
-  public getFieldsByListId(...ids: string[]) {
-    return Promise.all(
-      ids.map(id => this.getListById(id).then(list => this.getListFields(list)))
-    ).then(r => r.reduce((prev, fields) => prev.concat(fields), []));
+  public getFieldsByListId(id: string) {
+    return this.getListById(id).then(list => this.getListFields(list));
   }
 
   /**
    * Utility method: Get all fields in list by name
    */
-  public getFieldsByListTitle(...titles: string[]) {
-    return Promise.all(
-      titles.map(title =>
-        this.getListByTitle(title).then(list => this.getListFields(list))
-      )
-    ).then(r => r.reduce((prev, fields) => prev.concat(fields), []));
+  public getFieldsByListTitle(title: string) {
+    return this.getListByTitle(title).then(list => this.getListFields(list));
   }
 
   /**
