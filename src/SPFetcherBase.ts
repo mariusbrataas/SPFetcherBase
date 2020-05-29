@@ -70,10 +70,10 @@ export class SPFetcherBase {
     absolute: string;
     base: string;
   };
-  protected lists: {};
+  readonly lists: {};
   protected termsets: {};
 
-  protected web: IWeb;
+  public web: IWeb;
 
   public status: 'not initialized' | 'initializing' | 'ready' | 'error';
   protected queue: (() => void)[];
@@ -636,3 +636,110 @@ export class SPFetcherBase {
     );
   }
 }
+
+// const Fetcher = new SPFetcherBase();
+
+// function getTypeOf(data, exclude = '', depth = 0) {
+//   const type = typeof data;
+//   return type === 'object'
+//     ? data instanceof Array
+//       ? `${getTypeOf(data[0], exclude, depth + 1)}[]`
+//       : Object.keys(data || {}).length
+//       ? `{${Object.keys(data || {})
+//           .filter(test => test !== exclude)
+//           .sort()
+//           .reduce(
+//             (prev, key) =>
+//               key === 'odata.type'
+//                 ? `${prev}\n  "${key}": "${data[key]}"`
+//                 : `${prev}\n  ${
+//                     typeof key === 'string'
+//                       ? key.indexOf('.') === -1
+//                         ? key
+//                         : `"${key}"`
+//                       : key
+//                   }: ${getTypeOf(data[key], exclude, depth + 1)}`,
+//             ''
+//           )}\n}`
+//       : 'any'
+//     : type === 'undefined'
+//     ? 'any'
+//     : type;
+// }
+
+// function getInterfacesByList(...lists) {
+//   return Promise.all(lists.map(list => Fetcher.getListFields(list)))
+//     .then(r => r.reduce((prev, current) => prev.concat(current), []))
+//     .then(fields =>
+//       fields.reduce((prev, field) => {
+//         const type = field['odata.type'];
+//         const prev_field = prev[type] || {};
+//         return {
+//           ...prev,
+//           [type]: Object.keys(prev_field)
+//             .concat(Object.keys(field))
+//             .reduce(
+//               (field_prev, prop) => ({
+//                 ...field_prev,
+//                 [prop]: prev_field[prop] || field[prop]
+//               }),
+//               {}
+//             )
+//         };
+//       }, {})
+//     )
+//     .then(r =>
+//       Object.keys(r)
+//         .filter(key => key !== 'SP.Field')
+//         .reduce(
+//           (prev, key) => ({
+//             ...prev,
+//             [key]: Object.keys(r[key])
+//               .sort()
+//               .filter(test => !(test in r['SP.Field'] && test !== 'odata.type'))
+//               .reduce(
+//                 (prev_field, prop) => ({
+//                   ...prev_field,
+//                   [prop]: r[key][prop]
+//                 }),
+//                 {}
+//               )
+//           }),
+//           { 'SP.Field': r['SP.Field'] }
+//         )
+//     )
+//     .then(r => {
+//       const base = r['SP.Field'];
+//       return (
+//         Object.keys(r)
+//           .filter(key => key !== 'SP.Field')
+//           .sort()
+//           .reduce((prev, key) => {
+//             const type = getTypeOf(r[key]);
+//             return `${prev}\n\nexport interface ${key.replace(
+//               /.*\./,
+//               ''
+//             )} extends Field ${type === 'any' ? '{}' : type}`;
+//           }, `import { IFieldInfo } from "@pnp/sp/fields";\n\nexport interface Field extends IFieldInfo ${getTypeOf(base, 'odata.type')}`) +
+//         '\n\nexport interface IListFields {' +
+//         Object.keys(r)
+//           .filter(key => key !== 'SP.Field')
+//           .sort()
+//           .map(key => key.replace(/.*\./, ''))
+//           .reduce((prev, key) => `${prev}\n  ${key}: ${key};`, '') +
+//         '\n}\n\nexport type IListField = IListFields[keyof IListFields];'
+//       );
+//     });
+// }
+
+// Fetcher.web.lists
+//   .get()
+//   .then(r =>
+//     Promise.all(
+//       r
+//         .map(({ Id }) => Id)
+//         .map(Id => Fetcher.getListById(Id))
+//     )
+//   )
+//   .then(lists => getInterfacesByList(...lists))
+//   .then(console.log);

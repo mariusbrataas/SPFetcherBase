@@ -48,23 +48,57 @@ export interface ITerm {
   _ObjectType_: string;
 }
 
-export interface IListFields {
-  FieldChoice: FieldChoice;
-  FieldComputed: FieldComputed;
-  FieldDateTime: FieldDateTime;
-  FieldLookup: FieldLookup;
-  FieldMultiLineText: FieldMultiLineText;
-  FieldNumber: FieldNumber;
-  FieldText: FieldText;
-  FieldUser: FieldUser;
-  TaxonomyField: TaxonomyField;
-}
-
-export type IListField = IListFields[keyof IListFields];
-
 export interface Field extends IFieldInfo {
+  AutoIndexed: boolean;
+  CanBeDeleted: boolean;
+  ClientSideComponentId: string;
+  ClientSideComponentProperties: any;
+  ClientValidationFormula: any;
+  ClientValidationMessage: any;
+  CustomFormatter: any;
+  DefaultFormula: any;
+  DefaultValue: string;
+  Description: string;
+  Direction: string;
+  EnforceUniqueValues: boolean;
+  EntityPropertyName: string;
+  FieldTypeKind: number;
+  Filterable: boolean;
+  FromBaseType: boolean;
+  Group: string;
+  Hidden: boolean;
+  Id: string;
+  IndexStatus: number;
+  Indexed: boolean;
+  InternalName: string;
+  JSLink: string;
+  PinnedToFiltersPane: boolean;
+  ReadOnlyField: boolean;
+  Required: boolean;
+  SchemaXml: string;
+  Scope: string;
+  Sealed: boolean;
+  ShowInFiltersPane: number;
+  Sortable: boolean;
+  StaticName: string;
+  Title: string;
+  TypeAsString: string;
+  TypeDisplayName: string;
+  TypeShortDescription: string;
+  ValidationFormula: any;
+  ValidationMessage: any;
   'odata.editLink': string;
   'odata.id': string;
+}
+
+export interface FieldCalculated extends Field {
+  CurrencyLocaleId: number;
+  DateFormat: number;
+  DisplayFormat: number;
+  Formula: string;
+  OutputType: number;
+  ShowAsPercentage: boolean;
+  'odata.type': 'SP.FieldCalculated';
 }
 
 export interface FieldChoice extends Field {
@@ -87,9 +121,17 @@ export interface FieldDateTime extends Field {
   'odata.type': 'SP.FieldDateTime';
 }
 
+export interface FieldGeolocation extends Field {
+  'odata.type': 'SP.FieldGeolocation';
+}
+
+export interface FieldGuid extends Field {
+  'odata.type': 'SP.FieldGuid';
+}
+
 export interface FieldLookup extends Field {
   AllowMultipleValues: boolean;
-  DependentLookupInternalNames: any[];
+  DependentLookupInternalNames: string[];
   IsDependentLookup: boolean;
   IsRelationship: boolean;
   LookupField: string;
@@ -99,6 +141,13 @@ export interface FieldLookup extends Field {
   RelationshipDeleteBehavior: number;
   UnlimitedLengthInDocumentLibrary: boolean;
   'odata.type': 'SP.FieldLookup';
+}
+
+export interface FieldMultiChoice extends Field {
+  Choices: string[];
+  FillInChoice: boolean;
+  Mappings: any;
+  'odata.type': 'SP.FieldMultiChoice';
 }
 
 export interface FieldMultiLineText extends Field {
@@ -125,6 +174,11 @@ export interface FieldText extends Field {
   'odata.type': 'SP.FieldText';
 }
 
+export interface FieldUrl extends Field {
+  DisplayFormat: number;
+  'odata.type': 'SP.FieldUrl';
+}
+
 export interface FieldUser extends Field {
   AllowDisplay: boolean;
   AllowMultipleValues: boolean;
@@ -135,7 +189,7 @@ export interface FieldUser extends Field {
   LookupList: string;
   LookupWebId: string;
   Presence: boolean;
-  PrimaryFieldId: any;
+  PrimaryFieldId: string;
   RelationshipDeleteBehavior: number;
   SelectionGroup: number;
   SelectionMode: number;
@@ -168,3 +222,22 @@ export interface TaxonomyField extends Field {
   UserCreated: boolean;
   'odata.type': 'SP.Taxonomy.TaxonomyField';
 }
+
+export interface IListFields {
+  FieldText: FieldText;
+  FieldMultiLineText: FieldMultiLineText;
+  FieldUrl: FieldUrl;
+  FieldChoice: FieldChoice;
+  FieldLookup: FieldLookup;
+  TaxonomyField: TaxonomyField;
+  FieldUser: FieldUser;
+  FieldDateTime: FieldDateTime;
+  FieldMultiChoice: FieldMultiChoice;
+  FieldComputed: FieldComputed;
+  FieldNumber: FieldNumber;
+  FieldGuid: FieldGuid;
+  FieldGeolocation: FieldGeolocation;
+  FieldCalculated: FieldCalculated;
+}
+
+export type IListField = IListFields[keyof IListFields];

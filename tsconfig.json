@@ -16,7 +16,8 @@
     "strictNullChecks": false,
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "noErrorTruncation": true
   },
   "include": ["src"],
   "exclude": ["node_modules"]
