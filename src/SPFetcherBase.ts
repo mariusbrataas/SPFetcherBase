@@ -157,6 +157,13 @@ export class SPFetcherBase {
   }
 
   /**
+   * Utility method: Initialize empty batch object
+   */
+  public createBatch() {
+    return this.ready().then(() => sp.createBatch());
+  }
+
+  /**
    * Utility method: Perform a fetch-request using the spHttpClient
    */
   public fetch(
@@ -738,6 +745,7 @@ export class SPFetcherBase {
 //     Promise.all(
 //       r
 //         .map(({ Id }) => Id)
+//         .concat('298a967c-2d33-4f01-9c7f-178354ec4720')
 //         .map(Id => Fetcher.getListById(Id))
 //     )
 //   )
