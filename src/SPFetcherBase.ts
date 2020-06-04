@@ -337,6 +337,15 @@ export class SPFetcherBase {
   }
 
   /**
+   * Utility method: Get reference to field by internal name or title
+   */
+  public getFieldByInternalNameOrTitle(title: string) {
+    return this.ready().then(() =>
+      this.web.fields.getByInternalNameOrTitle(title)
+    );
+  }
+
+  /**
    * Utility method: Get reference to the relevant field's lookup list
    */
   public getFieldLookup(field: IField) {
