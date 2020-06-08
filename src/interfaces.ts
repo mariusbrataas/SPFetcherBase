@@ -1,4 +1,23 @@
 import { IFieldInfo } from '@pnp/sp/fields';
+import { IList } from '@pnp/sp/lists';
+
+export interface IFetcherBaseProperties {
+  urls: 'absolute' | 'base';
+  lists: undefined;
+  termsets: undefined;
+  sites: 'default' | 'current' | 'base';
+}
+
+export interface IFetcherPropertyTypes {
+  urls: string;
+  lists: IList;
+  termsets: string;
+  sites: string;
+}
+
+export type SPFetcherStructure = {
+  [key in keyof IFetcherPropertyTypes]: string;
+};
 
 export interface ITerm {
   CustomSortOrder: any;

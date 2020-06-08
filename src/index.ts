@@ -1,2 +1,2 @@
-export { SPFetcherBase } from './SPFetcherBase';
+export { SPFetcherBase } from './SPFetcher.base';
 export * from './interfaces';
