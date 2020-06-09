@@ -1,5 +1,4 @@
 import { IFieldInfo } from '@pnp/sp/fields';
-import { IList } from '@pnp/sp/lists';
 
 export interface IFetcherBaseProperties {
   urls: 'absolute' | 'base';
@@ -10,7 +9,7 @@ export interface IFetcherBaseProperties {
 
 export interface IFetcherPropertyTypes {
   urls: string;
-  lists: IList;
+  lists: string;
   termsets: string;
   sites: string;
 }
