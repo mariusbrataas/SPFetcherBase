@@ -1,5 +1,7 @@
 import { IFieldInfo } from '@pnp/sp/fields';
 
+export type ItemType = 'file' | 'folder';
+
 export interface IFetcherBaseProperties {
   urls: 'absolute' | 'base';
   lists: undefined;

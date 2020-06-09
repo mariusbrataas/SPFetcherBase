@@ -8,7 +8,8 @@ import {
   IListField,
   FieldLookup,
   ITerm,
-  SPFetcherStructure
+  SPFetcherStructure,
+  ItemType
 } from './interfaces';
 import { SPFetcherInitializer } from './SPFetcher.initializer';
 
@@ -286,11 +287,15 @@ export class SPFetcherUtils<
    */
   public getItemByPath(
     path: string,
+    type?: ItemType,
     site?: keyof SPFetcherInitializer<T>['sites']
   ) {
     return this.Web(site).then(web =>
-      web
-        .getFileByServerRelativePath(path)
+      web[
+        type === 'folder'
+          ? 'getFolderByServerRelativePath'
+          : 'getFileByServerRelativePath'
+      ](`/${path.replace(/^\/|\/$/g, '')}`)
         .getItem()
         .then(item => item)
     );
@@ -301,12 +306,13 @@ export class SPFetcherUtils<
    */
   public getParentLibrary(
     path?: string,
+    type?: ItemType,
     site?: keyof SPFetcherInitializer<T>['sites']
   ) {
     return path
-      ? this.getItemByPath(path, site)
+      ? this.getItemByPath(path, type, site)
           .then(item => item.toUrl().replace(/^.*guid'(.*)'(.*)/g, '$1'))
-          .then(libraryId => this.web.lists.getById(libraryId))
+          .then(libraryId => this.getListById(libraryId, site))
       : this.getDefaultLibrary(site);
   }
 
@@ -315,21 +321,18 @@ export class SPFetcherUtils<
    */
   public getAllItems(
     parent?: string,
-    contentType?: string,
+    type?: ItemType,
     select?: string | string[],
     filter?: string | string[],
     top?: number,
     site?: keyof SPFetcherInitializer<T>['sites']
   ) {
     if (parent) parent = parent.replace(/^\/|\/$/g, '');
-    const filters = [
-      parent ? `substringof('${parent}/',FileRef)` : undefined,
-      contentType ? `startswith(ContentTypeId,'${contentType}')` : undefined
-    ]
+    const filters = [parent ? `substringof('${parent}/',FileRef)` : undefined]
       .concat(filter || [])
       .filter(test => test)
       .join(' and ');
-    return this.getParentLibrary(parent, site)
+    return this.getParentLibrary(parent, type, site)
       .then(library => library.items)
       .then(items =>
         filters && filters.length ? items.filter(filters) : items
@@ -350,7 +353,7 @@ export class SPFetcherUtils<
   ) {
     return this.getAllItems(
       parent,
-      '0x0101',
+      'file',
       select,
       filter,
       top,
@@ -370,7 +373,7 @@ export class SPFetcherUtils<
   ) {
     return this.getAllItems(
       parent,
-      '0x0120',
+      'folder',
       select,
       filter,
       top,
