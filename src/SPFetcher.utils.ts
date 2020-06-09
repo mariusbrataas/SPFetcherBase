@@ -68,9 +68,11 @@ export class SPFetcherUtils<
   /**
    * Utility method: Get all properties
    */
-  public getProperties(): Promise<any> {
-    return this.ready().then(() =>
-      this.web.select('AllProperties').expand('AllProperties').get()
+  public getProperties(
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
+  ): Promise<any> {
+    return this.Web(site).then(web =>
+      web.select('AllProperties').expand('AllProperties').get()
     );
   }
 
@@ -78,8 +80,11 @@ export class SPFetcherUtils<
    * Utility method: Get storage entity
    * @param entity
    */
-  public getStorageEntity(entity: string) {
-    return this.ready().then(() => this.web.getStorageEntity(entity));
+  public getStorageEntity(
+    entity: string,
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
+  ) {
+    return this.Web(site).then(web => web.getStorageEntity(entity));
   }
 
   /**
@@ -87,7 +92,7 @@ export class SPFetcherUtils<
    */
   public getListByTitle(
     title: string,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return this.Web(site).then(web => web.lists.getByTitle(title));
   }
@@ -97,7 +102,7 @@ export class SPFetcherUtils<
    */
   public getListById(
     id: string,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return this.Web(site).then(web => web.lists.getById(id));
   }
@@ -114,7 +119,7 @@ export class SPFetcherUtils<
    */
   public getFieldsByListId(
     id: string,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return this.getListById(id, site).then(list => this.getListFields(list));
   }
@@ -124,7 +129,7 @@ export class SPFetcherUtils<
    */
   public getFieldsByListTitle(
     title: string,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return this.getListByTitle(title, site).then(list =>
       this.getListFields(list)
@@ -136,7 +141,7 @@ export class SPFetcherUtils<
    */
   public getFieldById(
     id: string,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return this.Web(site).then(web => web.fields.getById(id));
   }
@@ -146,7 +151,7 @@ export class SPFetcherUtils<
    */
   public getFieldByTitle(
     title: string,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return this.Web(site).then(web => web.fields.getByTitle(title));
   }
@@ -156,7 +161,7 @@ export class SPFetcherUtils<
    */
   public getFieldByInternalNameOrTitle(
     title: string,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return this.Web(site).then(web =>
       web.fields.getByInternalNameOrTitle(title)
@@ -175,7 +180,7 @@ export class SPFetcherUtils<
    */
   public getLookupByFieldId(
     id: string,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return this.getFieldById(id, site).then(field =>
       this.getFieldLookup(field)
@@ -187,7 +192,7 @@ export class SPFetcherUtils<
    */
   public getLookupByFieldTitle(
     title: string,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return this.getFieldByTitle(title, site).then(field =>
       this.getFieldLookup(field)
@@ -199,11 +204,11 @@ export class SPFetcherUtils<
    */
   public getTermsetById(
     id: string,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return this.post(
       `${
-        site ? this.sites[site] : this.sites.current
+        this.sites[site] || this.sites.current
       }/_vti_bin/client.svc/ProcessQuery`,
       {
         headers: {
@@ -237,7 +242,9 @@ export class SPFetcherUtils<
    * Utility method: Get default document library id
    * No need to use ready() here because getProperties() takes care of that.
    */
-  public getDefaultLibraryId(site?: keyof SPFetcherInitializer<T>['sites']) {
+  public getDefaultLibraryId(
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
+  ) {
     return this.Web(site)
       .then(web => web.defaultDocumentLibrary.select('Id').get())
       .then(r => r.Id)
@@ -252,7 +259,9 @@ export class SPFetcherUtils<
    * Utility method: Get default documents library
    * No need to use ready() here because getProperties() takes care of that.
    */
-  public getDefaultLibrary(site?: keyof SPFetcherInitializer<T>['sites']) {
+  public getDefaultLibrary(
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
+  ) {
     return this.getDefaultLibraryId(site).then(libraryId =>
       this.getListById(libraryId, site)
     );
@@ -290,7 +299,7 @@ export class SPFetcherUtils<
   public getItemByPath(
     path: string,
     type?: ItemType,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return this.Web(site).then(web =>
       web[
@@ -309,7 +318,7 @@ export class SPFetcherUtils<
   public getParentLibrary(
     path?: string,
     type?: ItemType,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return path
       ? this.getItemByPath(path, type, site)
@@ -327,7 +336,7 @@ export class SPFetcherUtils<
     select?: string | string[],
     filter?: string | string[],
     top?: number,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     if (parent) parent = parent.replace(/^\/|\/$/g, '');
     const filters = [parent ? `substringof('${parent}/',FileRef)` : undefined]
@@ -351,7 +360,7 @@ export class SPFetcherUtils<
     select?: string | string[],
     filter?: string | string[],
     top?: number,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return this.getAllItems(
       parent,
@@ -371,7 +380,7 @@ export class SPFetcherUtils<
     select?: string | string[],
     filter?: string | string[],
     top?: number,
-    site?: keyof SPFetcherInitializer<T>['sites']
+    site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     return this.getAllItems(
       parent,

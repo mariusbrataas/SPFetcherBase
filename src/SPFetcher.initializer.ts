@@ -9,9 +9,11 @@ import {
 export class SPFetcherInitializer<T extends SPFetcherStructure> {
   // Properties
   public context: BaseComponentContext;
-  protected web: IWeb;
   public status: 'not initialized' | 'initializing' | 'ready' | 'error';
   private queue: (() => void)[];
+  private webs: {
+    [key in T['sites'] | IFetcherBaseProperties['sites']]: IWeb;
+  };
 
   // "Volatile" properties
   public urls: {
@@ -38,9 +40,11 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
   // Constructor
   constructor() {
     this.context = undefined;
-    this.web = undefined;
     this.status = 'not initialized';
     this.queue = [];
+    this.webs = {
+      ...this.webs
+    };
     this.urls = {
       ...this.urls
     };
@@ -81,9 +85,7 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
         this.urls.base = this.sites.base;
 
         // Get new web object
-        this.getWeb()
-          .then(web => (this.web = web))
-          .then(() => resolve());
+        this.Web().then(() => resolve());
       }
     })
       .then(() => this.startupRoutines())
@@ -114,8 +116,10 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
    * Get a new web object for the given site.
    * Only to be used by utility methods.
    */
-  protected Web(site?: keyof SPFetcherInitializer<T>['sites']) {
-    return this.ready().then(() => (site ? this.getWeb(site) : this.web));
+  protected Web(site: keyof SPFetcherInitializer<T>['sites'] = 'default') {
+    return this.ready().then(
+      () => (this.webs[site] = this.webs[site] || Web(this.sites[site]))
+    );
   }
 
   /**
@@ -146,15 +150,5 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
    */
   protected startupRoutines(): Promise<any> {
     return Promise.all([]);
-  }
-
-  /**
-   * Set the absolute url to be used by the current fetcher instance.
-   *
-   * @param url
-   */
-  public setSite(site?: keyof SPFetcherInitializer<T>['sites']) {
-    this.sites.current = this.sites[site] || this.sites.default;
-    return this.getWeb(this.sites.current).then(web => (this.web = web));
   }
 }
