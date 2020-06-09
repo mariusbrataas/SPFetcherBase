@@ -202,7 +202,9 @@ export class SPFetcherUtils<
     site?: keyof SPFetcherInitializer<T>['sites']
   ) {
     return this.post(
-      `${site || this.sites.current}/_vti_bin/client.svc/ProcessQuery`,
+      `${
+        site ? this.sites[site] : this.sites.current
+      }/_vti_bin/client.svc/ProcessQuery`,
       {
         headers: {
           accept: 'application/json',

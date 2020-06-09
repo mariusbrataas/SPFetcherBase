@@ -213,8 +213,12 @@ export class SPFetcherBase<T extends SPFetcherStructure> extends SPFetcherUtils<
    * @param id
    * @param new_path
    */
-  public buildTaxonomyPathByFieldId(id: string, new_path: string) {
-    return this.getFieldById(id).then(field =>
+  public buildTaxonomyPathByFieldId(
+    id: string,
+    new_path: string,
+    site?: keyof SPFetcherInitializer<T>['sites']
+  ) {
+    return this.getFieldById(id, site).then(field =>
       this.buildTaxonomyPathByField(field, new_path)
     );
   }
@@ -224,8 +228,27 @@ export class SPFetcherBase<T extends SPFetcherStructure> extends SPFetcherUtils<
    * @param title
    * @param new_path
    */
-  public buildTaxonomyPathByFieldTitle(title: string, new_path: string) {
-    return this.getFieldByTitle(title).then(field =>
+  public buildTaxonomyPathByFieldTitle(
+    title: string,
+    new_path: string,
+    site?: keyof SPFetcherInitializer<T>['sites']
+  ) {
+    return this.getFieldByTitle(title, site).then(field =>
+      this.buildTaxonomyPathByField(field, new_path)
+    );
+  }
+
+  /**
+   * Utility method: Build taxonomy path at termset related to field by field title
+   * @param title
+   * @param new_path
+   */
+  public buildTaxonomyPathByFieldInternalNameOrTitle(
+    title: string,
+    new_path: string,
+    site?: keyof SPFetcherInitializer<T>['sites']
+  ) {
+    return this.getFieldByInternalNameOrTitle(title, site).then(field =>
       this.buildTaxonomyPathByField(field, new_path)
     );
   }
