@@ -339,7 +339,11 @@ export class SPFetcherUtils<
     site?: Parameters<SPFetcherInitializer<T>['Web']>[0]
   ) {
     if (parent) parent = parent.replace(/^\/|\/$/g, '');
-    const filters = [parent ? `substringof('${parent}/',FileRef)` : undefined]
+    const filters = [
+      parent
+        ? `FileRef eq '${parent}' or substringof('${parent}/',FileRef)`
+        : undefined
+    ]
       .concat(filter || [])
       .filter(test => test)
       .join(' and ');
