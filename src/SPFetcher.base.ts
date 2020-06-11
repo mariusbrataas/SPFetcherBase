@@ -87,18 +87,28 @@ export class SPFetcherBase<T extends SPFetcherStructure> extends SPFetcherUtils<
     ]).then(([name, types]) => `interface I${name}Item {${types}\n}`);
   }
 
-  public getFieldsInterfaceByListId(...ids: string[]) {
+  public getFieldsInterfaceByListId(
+    id: string | string[],
+    site?: keyof SPFetcherInitializer<T>['sites']
+  ) {
     return Promise.all(
-      ids.map(id =>
-        this.getListById(id).then(list => this.getFieldsInterface(list))
+      (id instanceof Array ? id : [id]).map(list_id =>
+        this.getListById(list_id, site).then(list =>
+          this.getFieldsInterface(list)
+        )
       )
     ).then(r => r.join('\n\n'));
   }
 
-  public getFieldsInterfaceByListTitle(...titles: string[]) {
+  public getFieldsInterfaceByListTitle(
+    titles: string | string[],
+    site?: keyof SPFetcherInitializer<T>['sites']
+  ) {
     return Promise.all(
-      titles.map(title =>
-        this.getListByTitle(title).then(list => this.getFieldsInterface(list))
+      (titles instanceof Array ? titles : [titles]).map(title =>
+        this.getListByTitle(title, site).then(list =>
+          this.getFieldsInterface(list)
+        )
       )
     ).then(r => r.join('\n\n'));
   }
