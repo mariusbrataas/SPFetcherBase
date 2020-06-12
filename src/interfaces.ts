@@ -244,6 +244,7 @@ export interface TaxonomyField extends Field {
 }
 
 export interface IListFields {
+  Field: Field;
   FieldText: FieldText;
   FieldMultiLineText: FieldMultiLineText;
   FieldUrl: FieldUrl;
