@@ -116,7 +116,7 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
    * Get a new web object for the given site.
    * Only to be used by utility methods.
    */
-  protected Web(site: keyof SPFetcherInitializer<T>['sites'] = 'default') {
+  public Web(site: keyof SPFetcherInitializer<T>['sites'] = 'default') {
     return this.ready().then(
       () => (this.webs[site] = this.webs[site] || Web(this.sites[site]))
     );
