@@ -12,7 +12,10 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
   public status: 'not initialized' | 'initializing' | 'ready' | 'error';
   private queue: (() => void)[];
   private batches: {
-    [key in T['sites'] | IFetcherBaseProperties['sites']]?: SPBatch;
+    [key in T['sites'] | IFetcherBaseProperties['sites']]?: {
+      batch: SPBatch;
+      count: number;
+    };
   };
   private webs: {
     [key in T['sites'] | IFetcherBaseProperties['sites']]: IWeb;
@@ -173,9 +176,14 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
     site: keyof SPFetcherInitializer<T>['sites'] = 'default'
   ) {
     return this.Web(site).then(web => {
+      if (this.batches[site] && this.batches[site].count >= 50)
+        this.batches[site] = undefined;
       if (!this.batches[site]) {
         const batch = web.createBatch();
-        this.batches[site] = batch;
+        this.batches[site] = {
+          batch,
+          count: 0
+        };
         setTimeout(() => {
           this.batches[site] = undefined;
           setTimeout(() => {
@@ -183,7 +191,9 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
           }, 5);
         }, timeout);
       }
-      return this.batches[site];
+      console.log(`AutoBatch [${site}]`);
+      this.batches[site].count += 1;
+      return this.batches[site].batch;
     });
   }
 }
