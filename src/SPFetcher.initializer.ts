@@ -11,7 +11,9 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
   public context: BaseComponentContext;
   public status: 'not initialized' | 'initializing' | 'ready' | 'error';
   private queue: (() => void)[];
-  private currentBatch: SPBatch;
+  private batches: {
+    [key in T['sites'] | IFetcherBaseProperties['sites']]?: SPBatch;
+  };
   private webs: {
     [key in T['sites'] | IFetcherBaseProperties['sites']]: IWeb;
   };
@@ -43,7 +45,7 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
     this.context = undefined;
     this.status = 'not initialized';
     this.queue = [];
-    this.currentBatch = undefined;
+    this.batches = {};
     this.webs = {
       ...this.webs
     };
@@ -157,8 +159,8 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
   /**
    * Utility method: Initialize empty batch object
    */
-  public createBatch() {
-    return this.ready().then(() => sp.createBatch());
+  public createBatch(site: keyof SPFetcherInitializer<T>['sites'] = 'default') {
+    return this.Web(site).then(web => web.createBatch());
   }
 
   /**
@@ -166,19 +168,22 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
    *
    * @param timeout - Maximum delay before executing batch
    */
-  public autoBatch(timeout: number = 50) {
-    return this.ready().then(() => {
-      if (!this.currentBatch) {
-        const batch = sp.createBatch();
-        this.currentBatch = batch;
+  public autoBatch(
+    timeout: number = 50,
+    site: keyof SPFetcherInitializer<T>['sites'] = 'default'
+  ) {
+    return this.Web(site).then(web => {
+      if (!this.batches[site]) {
+        const batch = web.createBatch();
+        this.batches[site] = batch;
         setTimeout(() => {
-          this.currentBatch = undefined;
+          this.batches[site] = undefined;
           setTimeout(() => {
             batch.execute();
           }, 5);
         }, timeout);
       }
-      return this.currentBatch;
+      return this.batches[site];
     });
   }
 }
