@@ -17,13 +17,6 @@ export class SPFetcherUtils<
   T extends SPFetcherStructure
 > extends SPFetcherInitializer<T> {
   /**
-   * Utility method: Initialize empty batch object
-   */
-  public createBatch() {
-    return this.ready().then(() => sp.createBatch());
-  }
-
-  /**
    * Utility method: Perform a fetch-request using the spHttpClient
    */
   public fetch(

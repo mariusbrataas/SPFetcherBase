@@ -1,4 +1,4 @@
-import { sp, Web, IWeb } from '@pnp/sp/presets/all';
+import { sp, Web, IWeb, SPBatch } from '@pnp/sp/presets/all';
 import { BaseComponentContext } from '@microsoft/sp-component-base';
 import {
   SPFetcherStructure,
@@ -11,6 +11,7 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
   public context: BaseComponentContext;
   public status: 'not initialized' | 'initializing' | 'ready' | 'error';
   private queue: (() => void)[];
+  private currentBatch: SPBatch;
   private webs: {
     [key in T['sites'] | IFetcherBaseProperties['sites']]: IWeb;
   };
@@ -42,6 +43,7 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
     this.context = undefined;
     this.status = 'not initialized';
     this.queue = [];
+    this.currentBatch = undefined;
     this.webs = {
       ...this.webs
     };
@@ -150,5 +152,31 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
    */
   protected startupRoutines(): Promise<any> {
     return Promise.all([]);
+  }
+
+  /**
+   * Utility method: Initialize empty batch object
+   */
+  public createBatch() {
+    return this.ready().then(() => sp.createBatch());
+  }
+
+  /**
+   * Utility method: Returns a batch object that will execute automatically
+   *
+   * @param timeout - Maximum delay before executing batch
+   */
+  public autoBatch(timeout: number = 50) {
+    return this.ready().then(() => {
+      if (!this.currentBatch) {
+        const batch = sp.createBatch();
+        this.currentBatch = batch;
+        setTimeout(() => {
+          this.currentBatch = undefined;
+          batch.execute();
+        }, timeout);
+      }
+      return this.currentBatch;
+    });
   }
 }
