@@ -1,4 +1,4 @@
-import { sp, IList, IField } from '@pnp/sp/presets/all';
+import { IList, IField } from '@pnp/sp/presets/all';
 import {
   SPHttpClient,
   ISPHttpClientOptions,
