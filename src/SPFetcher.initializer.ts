@@ -173,7 +173,9 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
         this.currentBatch = batch;
         setTimeout(() => {
           this.currentBatch = undefined;
-          batch.execute();
+          setTimeout(() => {
+            batch.execute();
+          }, 5);
         }, timeout);
       }
       return this.currentBatch;
