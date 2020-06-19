@@ -175,25 +175,27 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
     timeout: number = 50,
     site: keyof SPFetcherInitializer<T>['sites'] = 'default'
   ) {
+    const key = `[${timeout}ms] - ${site}`;
     return this.Web(site).then(web => {
-      if (this.batches[site] && this.batches[site].count >= 50)
-        this.batches[site] = undefined;
-      if (!this.batches[site]) {
-        const batch = web.createBatch();
-        this.batches[site] = {
-          batch,
-          count: 0
-        };
-        setTimeout(() => {
-          this.batches[site] = undefined;
+      return () => {
+        if (this.batches[key] && this.batches[key].count >= 50)
+          this.batches[key] = undefined;
+        if (!this.batches[key]) {
+          const batch = web.createBatch();
+          this.batches[key] = {
+            batch,
+            count: 0
+          };
           setTimeout(() => {
-            batch.execute();
-          }, 5);
-        }, timeout);
-      }
-      console.log(`AutoBatch [${site}]`);
-      this.batches[site].count += 1;
-      return this.batches[site].batch;
+            this.batches[key] = undefined;
+            setTimeout(() => {
+              batch.execute();
+            }, 5);
+          }, timeout);
+        }
+        this.batches[key].count += 1;
+        return this.batches[key].batch;
+      };
     });
   }
 }
