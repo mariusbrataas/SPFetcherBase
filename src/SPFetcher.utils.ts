@@ -17,6 +17,16 @@ export class SPFetcherUtils<
   T extends SPFetcherStructure
 > extends SPFetcherInitializer<T> {
   /**
+   * Properties
+   */
+  private contentTypes: {
+    [key: string]: {
+      callbacks: ((arg: string[]) => void)[];
+      StringIds: string[];
+    };
+  };
+
+  /**
    * Utility method: Perform a fetch-request using the spHttpClient
    */
   public fetch(
@@ -387,5 +397,83 @@ export class SPFetcherUtils<
       top,
       site
     ).then(items => items.get());
+  }
+
+  /**
+   * Helper method: Get ids of all content types
+   */
+  private getContentTypeIds({
+    site,
+    list
+  }: {
+    site?: string;
+    list?: string;
+  }): Promise<string[]> {
+    const key = `[${site || 'site'}]-[${list || 'list'}]`;
+    if (!this.contentTypes) this.contentTypes = {};
+    return new Promise(resolve => {
+      if (this.contentTypes[key]) {
+        if (this.contentTypes[key].StringIds) {
+          resolve(this.contentTypes[key].StringIds);
+        } else this.contentTypes[key].callbacks.push(resolve);
+      } else {
+        this.contentTypes[key] = {
+          callbacks: [resolve],
+          StringIds: undefined
+        };
+        (list === undefined
+          ? this.Web(site).then(web => web.contentTypes)
+          : this.getListByTitle(list, site).then(
+              library => library.contentTypes
+            )
+        )
+          .then(contentTypes => contentTypes.select('StringId').get())
+          .then(contentTypes => contentTypes.map(({ StringId }) => StringId))
+          .then(StringIds => {
+            this.contentTypes[key].StringIds = StringIds;
+            this.contentTypes[key].callbacks.forEach(cb => cb(StringIds));
+            this.contentTypes[key].callbacks = [];
+          });
+      }
+    });
+  }
+
+  /**
+   * Utility method: Get info for field
+   */
+  public getFieldInfo({
+    site,
+    id,
+    name,
+    list
+  }: { site?: string; list?: string } & (
+    | { id: string; name?: string }
+    | { id?: string; name: string }
+  )) {
+    if (site && !this.sites[site]) this.sites[site] = site;
+    return Promise.all([
+      list === undefined
+        ? this.Web(site).then(web => web.contentTypes)
+        : this.getListByTitle(list, site).then(library => library.contentTypes),
+      this.getContentTypeIds({ site, list })
+    ])
+      .then(([contentTypes, StringIds]) =>
+        this.autoBatch(10, site).then(getBatch =>
+          Promise.all(
+            StringIds.map(StringId =>
+              contentTypes
+                .getById(StringId)
+                .fields.filter(
+                  id === undefined
+                    ? `InternalName eq '${name}'`
+                    : `Id eq '${id}'`
+                )
+                .inBatch(getBatch())
+                .get()
+            )
+          )
+        )
+      )
+      .then(r => (r.find(test => test.length > 0) || [])[0] as IListField);
   }
 }
