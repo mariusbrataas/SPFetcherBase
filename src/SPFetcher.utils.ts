@@ -441,36 +441,36 @@ export class SPFetcherUtils<
   /**
    * Utility method: Get info for field
    */
-  public getFieldInfo({
-    site,
-    id,
-    name,
-    list
-  }: { site?: string; list?: string } & (
-    | { id: string; name?: string }
-    | { id?: string; name: string }
-  )) {
+  public getFieldInfo(
+    {
+      site,
+      id,
+      name,
+      list
+    }: { site?: string; list?: string } & (
+      | { id: string; name?: string }
+      | { id?: string; name: string }
+    ),
+    timeout: number = 10
+  ) {
     if (site && !this.sites[site]) this.sites[site] = site;
     return Promise.all([
       list === undefined
         ? this.Web(site).then(web => web.contentTypes)
         : this.getListByTitle(list, site).then(library => library.contentTypes),
-      this.getContentTypeIds({ site, list })
+      this.getContentTypeIds({ site, list }),
+      this.autoBatch(timeout, site)
     ])
-      .then(([contentTypes, StringIds]) =>
-        this.autoBatch(10, site).then(getBatch =>
-          Promise.all(
-            StringIds.map(StringId =>
-              contentTypes
-                .getById(StringId)
-                .fields.filter(
-                  id === undefined
-                    ? `InternalName eq '${name}'`
-                    : `Id eq '${id}'`
-                )
-                .inBatch(getBatch())
-                .get()
-            )
+      .then(([contentTypes, StringIds, getBatch]) =>
+        Promise.all(
+          StringIds.map(StringId =>
+            contentTypes
+              .getById(StringId)
+              .fields.filter(
+                id === undefined ? `InternalName eq '${name}'` : `Id eq '${id}'`
+              )
+              .inBatch(getBatch())
+              .get()
           )
         )
       )
