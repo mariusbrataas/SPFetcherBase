@@ -1,4 +1,5 @@
 import { sp, Web, IWeb, SPBatch } from '@pnp/sp/presets/all';
+import { graph, GraphRest } from '@pnp/graph/presets/all';
 import { BaseComponentContext } from '@microsoft/sp-component-base';
 import {
   SPFetcherStructure,
@@ -9,6 +10,7 @@ import {
 export class SPFetcherInitializer<T extends SPFetcherStructure> {
   // Properties
   public context: BaseComponentContext;
+  public graph: GraphRest;
   public status: 'not initialized' | 'initializing' | 'ready' | 'error';
   private queue: (() => void)[];
   private batches: {
@@ -46,6 +48,7 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
   // Constructor
   constructor() {
     this.context = undefined;
+    this.graph = undefined;
     this.status = 'not initialized';
     this.queue = [];
     this.batches = {};
@@ -78,7 +81,7 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
         this.context = context;
 
         // Setup pnp
-        sp.setup({ spfxContext: context });
+        [sp.setup, graph.setup].forEach(cb => cb({ spfxContext: context }));
 
         // Extract sites from context
         this.sites.default = this.context.pageContext.site.absoluteUrl;
@@ -92,7 +95,7 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
         this.urls.base = this.sites.base;
 
         // Get new web object
-        this.Web().then(() => resolve());
+        Promise.all([this.Web(), this.Graph()]).then(() => resolve());
       }
     })
       .then(() => this.startupRoutines())
@@ -106,6 +109,13 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
         this.status = 'error';
         throw error;
       });
+  }
+
+  /**
+   * Get the graph object
+   */
+  public Graph() {
+    return this.ready().then(() => (this.graph = this.graph || graph));
   }
 
   /**
