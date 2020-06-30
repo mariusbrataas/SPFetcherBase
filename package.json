@@ -16,7 +16,6 @@
   },
   "devDependencies": {
     "@pnp/sp": "^2.0.5",
-    "@pnp/graph": "^2.0.6",
     "prettier": "^2.0.4",
     "typescript": "^3.8.3",
     "@microsoft/sp-component-base": "^1.10.0"
