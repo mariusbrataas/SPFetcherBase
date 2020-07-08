@@ -1,6 +1,6 @@
 {
   "name": "spfetcherbase",
-  "version": "1.0.68",
+  "version": "1.0.69",
   "description": "A container for all requests in a Sharepoint webpart",
   "author": "Marius Brataas",
   "license": "MIT",
