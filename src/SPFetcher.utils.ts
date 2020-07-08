@@ -72,17 +72,16 @@ export class SPFetcherUtils<
   /**
    * Utility method: Search for users
    */
-  public searchUser(query: string, limit: number = 10): Promise<SearchUser[]> {
+  public searchUser(query: string, limit: number = 5): Promise<SearchUser[]> {
     return this.get(
       `${
         this.urls.absolute
-      }/_vti_bin/ListData.svc/UserInformationList?$select=*&$filter=substringof('${query}',Name)&$top=${
-        limit || 10
+      }/_vti_bin/ListData.svc/UserInformationList?$select=*&$filter=(substringof('${query}',Name) or substringof('${query}',Account))&$top=${
+        limit || 5
       }`
     )
       .then(r => r.json())
-      .then(r => r.d)
-      .then(r => (r.results ? r.results : r));
+      .then(r => r.d.results || r.d);
   }
 
   /**
