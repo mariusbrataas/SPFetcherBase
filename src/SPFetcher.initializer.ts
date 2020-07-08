@@ -120,6 +120,13 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
   }
 
   /**
+   * Get the sp object
+   */
+  public SP() {
+    return this.ready().then(() => sp);
+  }
+
+  /**
    * Get a new web object for the given site.
    * Only to be used by utility methods.
    */

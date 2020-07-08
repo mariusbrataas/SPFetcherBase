@@ -12,6 +12,7 @@ import {
   ItemType
 } from './interfaces';
 import { SPFetcherInitializer } from './SPFetcher.initializer';
+import { sp } from '@pnp/sp';
 
 export class SPFetcherUtils<
   T extends SPFetcherStructure
@@ -43,6 +44,22 @@ export class SPFetcherUtils<
         config,
         options
       )
+    );
+  }
+
+  /**
+   * Utility method: Search for users
+   */
+  public searchUsers(query: string, limit: number = 10) {
+    return this.ready().then(() =>
+      sp.profiles.clientPeoplePickerSearchUser({
+        AllowEmailAddresses: true,
+        AllowMultipleEntities: false,
+        AllUrlZones: false,
+        MaximumEntitySuggestions: limit,
+        PrincipalType: 1,
+        QueryString: query
+      })
     );
   }
 
