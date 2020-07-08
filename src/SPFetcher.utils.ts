@@ -13,7 +13,6 @@ import {
   SearchUser
 } from './interfaces';
 import { SPFetcherInitializer } from './SPFetcher.initializer';
-import { sp } from '@pnp/sp';
 
 export class SPFetcherUtils<
   T extends SPFetcherStructure
