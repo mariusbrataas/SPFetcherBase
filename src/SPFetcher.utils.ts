@@ -9,7 +9,8 @@ import {
   FieldLookup,
   ITerm,
   SPFetcherStructure,
-  ItemType
+  ItemType,
+  SearchUser
 } from './interfaces';
 import { SPFetcherInitializer } from './SPFetcher.initializer';
 import { sp } from '@pnp/sp';
@@ -48,22 +49,6 @@ export class SPFetcherUtils<
   }
 
   /**
-   * Utility method: Search for users
-   */
-  public searchUsers(query: string, limit: number = 10) {
-    return this.ready().then(() =>
-      sp.profiles.clientPeoplePickerSearchUser({
-        AllowEmailAddresses: true,
-        AllowMultipleEntities: false,
-        AllUrlZones: false,
-        MaximumEntitySuggestions: limit,
-        PrincipalType: 1,
-        QueryString: query
-      })
-    );
-  }
-
-  /**
    * Utility method: Perform a get-request using the spHttpClient
    */
   public get(
@@ -83,6 +68,22 @@ export class SPFetcherUtils<
     config: SPHttpClientConfiguration = SPHttpClient.configurations.v1
   ) {
     return this.fetch(url, options, config, 'post');
+  }
+
+  /**
+   * Utility method: Search for users
+   */
+  public searchUser(query: string, limit: number = 10): Promise<SearchUser[]> {
+    return this.get(
+      `${
+        this.urls.absolute
+      }/_vti_bin/ListData.svc/UserInformationList?$select=*&$filter=substringof('${query}',Name)&$top=${
+        limit || 10
+      }`
+    )
+      .then(r => r.json())
+      .then(r => r.d)
+      .then(r => (r.results ? r.results : r));
   }
 
   /**
