@@ -9,8 +9,7 @@ import {
   FieldLookup,
   ITerm,
   SPFetcherStructure,
-  ItemType,
-  SearchUser
+  ItemType
 } from './interfaces';
 import { SPFetcherInitializer } from './SPFetcher.initializer';
 
@@ -73,18 +72,16 @@ export class SPFetcherUtils<
    * Utility method: Search for users
    */
   public searchUsers(query: string, limit: number = 5) {
-    return this.ready()
-      .then(() =>
-        sp.profiles.clientPeoplePickerSearchUser({
-          AllowEmailAddresses: true,
-          AllowMultipleEntities: false,
-          AllUrlZones: false,
-          MaximumEntitySuggestions: limit,
-          PrincipalType: 1,
-          QueryString: query
-        })
-      )
-      .then();
+    return this.ready().then(() =>
+      sp.profiles.clientPeoplePickerSearchUser({
+        AllowEmailAddresses: true,
+        AllowMultipleEntities: false,
+        AllUrlZones: false,
+        MaximumEntitySuggestions: limit,
+        PrincipalType: 1,
+        QueryString: query
+      })
+    );
   }
 
   /**
