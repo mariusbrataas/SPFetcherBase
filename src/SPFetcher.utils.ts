@@ -1,4 +1,4 @@
-import { IList, IField } from '@pnp/sp/presets/all';
+import { sp, IList, IField } from '@pnp/sp/presets/all';
 import {
   SPHttpClient,
   ISPHttpClientOptions,
@@ -72,16 +72,19 @@ export class SPFetcherUtils<
   /**
    * Utility method: Search for users
    */
-  public searchUser(query: string, limit: number = 5): Promise<SearchUser[]> {
-    return this.get(
-      `${
-        this.urls.absolute
-      }/_vti_bin/ListData.svc/UserInformationList?$select=*&$filter=(substringof('${query}',Name) or substringof('${query}',Account))&$top=${
-        limit || 5
-      }`
-    )
-      .then(r => r.json())
-      .then(r => r.d.results || r.d);
+  public searchUsers(query: string, limit: number = 5) {
+    return this.ready()
+      .then(() =>
+        sp.profiles.clientPeoplePickerSearchUser({
+          AllowEmailAddresses: true,
+          AllowMultipleEntities: false,
+          AllUrlZones: false,
+          MaximumEntitySuggestions: limit,
+          PrincipalType: 1,
+          QueryString: query
+        })
+      )
+      .then();
   }
 
   /**
