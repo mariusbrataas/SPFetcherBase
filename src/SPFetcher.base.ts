@@ -350,7 +350,6 @@ export class SPFetcherBase<
 //           }, `import { IFieldInfo } from "@pnp/sp/fields";\n\nexport interface Field extends IFieldInfo ${getTypeOf(base, 'odata.type')}`) +
 //         '\n\nexport interface IListFields {' +
 //         Object.keys(r)
-//           .filter(key => key !== 'SP.Field')
 //           .sort()
 //           .map(key => key.replace(/.*\./, ''))
 //           .reduce((prev, key) => `${prev}\n  ${key}: ${key};`, '') +
@@ -364,23 +363,10 @@ export class SPFetcherBase<
 //     Fetcher.Web(site)
 //       .then(web => web.lists.get())
 //       .then(lists =>
-//         Promise.all(lists.map(list => Fetcher.getListByTitle(list.Title, site)))
+//         Promise.all(lists.map(list => Fetcher.getListById(list.Id, site)))
 //       )
 //   )
 // )
 //   .then(lists => lists.flat())
 //   .then(lists => getInterfacesByList(lists))
-//   .then(console.log);
-
-// Fetcher.web.lists
-//   .get()
-//   .then(r =>
-//     Promise.all(
-//       r
-//         .map(({ Id }) => Id)
-//         .concat('298a967c-2d33-4f01-9c7f-178354ec4720')
-//         .map(Id => Fetcher.getListById(Id))
-//     )
-//   )
-//   .then(lists => getInterfacesByList(...lists))
 //   .then(console.log);

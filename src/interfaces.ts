@@ -229,7 +229,7 @@ export interface FieldUser extends Field {
   LookupList: string;
   LookupWebId: string;
   Presence: boolean;
-  PrimaryFieldId: string;
+  PrimaryFieldId: any;
   RelationshipDeleteBehavior: number;
   SelectionGroup: number;
   SelectionMode: number;
@@ -264,6 +264,7 @@ export interface TaxonomyField extends Field {
 }
 
 export interface IListFields {
+  Field: Field;
   FieldCalculated: FieldCalculated;
   FieldChoice: FieldChoice;
   FieldComputed: FieldComputed;
