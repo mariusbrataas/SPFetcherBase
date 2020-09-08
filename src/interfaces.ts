@@ -1,4 +1,5 @@
 import { IFieldInfo } from '@pnp/sp/fields';
+export { BaseComponentContext } from '@microsoft/sp-component-base';
 
 export type ItemType = 'file' | 'folder';
 

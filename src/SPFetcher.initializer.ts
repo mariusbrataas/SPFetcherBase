@@ -1,6 +1,6 @@
 import { sp, Web, IWeb, SPBatch } from '@pnp/sp/presets/all';
-import { BaseComponentContext } from '@microsoft/sp-component-base';
 import {
+  BaseComponentContext,
   SPFetcherStructure,
   IFetcherBaseProperties,
   IFetcherPropertyTypes
@@ -131,6 +131,7 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
    * Only to be used by utility methods.
    */
   public Web(site: keyof SPFetcherInitializer<T>['sites'] = 'default') {
+    if (!this.sites[site]) this.sites[site] = site;
     return this.ready().then(
       () => (this.webs[site] = this.webs[site] || Web(this.sites[site]))
     );
