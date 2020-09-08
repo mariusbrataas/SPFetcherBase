@@ -1,7 +1,7 @@
 import { IList, IField } from '@pnp/sp/presets/all';
 import { ITerm, TaxonomyField, SPFetcherStructure } from './interfaces';
-import { SPFetcherUtils } from './SPFetcher.utils';
 import { SPFetcherInitializer } from './SPFetcher.initializer';
+import { SPFetcherBuildInterfaces } from './SPFetcher.buildInterfaces';
 
 /**
  * SPFetcherBase
@@ -59,9 +59,9 @@ import { SPFetcherInitializer } from './SPFetcher.initializer';
  * }
  */
 
-export class SPFetcherBase<T extends SPFetcherStructure> extends SPFetcherUtils<
-  T
-> {
+export class SPFetcherBase<
+  T extends SPFetcherStructure
+> extends SPFetcherBuildInterfaces<T> {
   /**
    * Utility method: Get interface for list
    */
@@ -294,8 +294,8 @@ export class SPFetcherBase<T extends SPFetcherStructure> extends SPFetcherUtils<
 //     : type;
 // }
 
-// function getInterfacesByList(...lists) {
-//   return Promise.all(lists.map(list => Fetcher.getListFields(list)))
+// function getInterfacesByList(lists) {
+//   return Promise.all(lists.map(list => list.fields()))
 //     .then(r => r.reduce((prev, current) => prev.concat(current), []))
 //     .then(fields =>
 //       fields.reduce((prev, field) => {
@@ -358,6 +358,19 @@ export class SPFetcherBase<T extends SPFetcherStructure> extends SPFetcherUtils<
 //       );
 //     });
 // }
+
+// Promise.all(
+//   ['SIOSAdmin', 'default'].map(site =>
+//     Fetcher.Web(site)
+//       .then(web => web.lists.get())
+//       .then(lists =>
+//         Promise.all(lists.map(list => Fetcher.getListByTitle(list.Title, site)))
+//       )
+//   )
+// )
+//   .then(lists => lists.flat())
+//   .then(lists => getInterfacesByList(lists))
+//   .then(console.log);
 
 // Fetcher.web.lists
 //   .get()

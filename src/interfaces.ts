@@ -69,7 +69,7 @@ export interface ITerm {
   _ObjectType_: string;
 }
 
-export interface FieldBase extends IFieldInfo {
+export interface Field extends IFieldInfo {
   AutoIndexed: boolean;
   CanBeDeleted: boolean;
   ClientSideComponentId: string;
@@ -112,11 +112,7 @@ export interface FieldBase extends IFieldInfo {
   'odata.id': string;
 }
 
-export interface Field extends FieldBase {
-  'odata.type': 'SP.Field';
-}
-
-export interface FieldCalculated extends FieldBase {
+export interface FieldCalculated extends Field {
   CurrencyLocaleId: number;
   DateFormat: number;
   DisplayFormat: number;
@@ -126,7 +122,7 @@ export interface FieldCalculated extends FieldBase {
   'odata.type': 'SP.FieldCalculated';
 }
 
-export interface FieldChoice extends FieldBase {
+export interface FieldChoice extends Field {
   Choices: string[];
   EditFormat: number;
   FillInChoice: boolean;
@@ -134,29 +130,44 @@ export interface FieldChoice extends FieldBase {
   'odata.type': 'SP.FieldChoice';
 }
 
-export interface FieldComputed extends FieldBase {
+export interface FieldComputed extends Field {
   EnableLookup: boolean;
   'odata.type': 'SP.FieldComputed';
 }
 
-export interface FieldDateTime extends FieldBase {
+export interface FieldCurrency extends Field {
+  CommaSeparator: boolean;
+  CurrencyLocaleId: number;
+  CustomUnitName: any;
+  CustomUnitOnRight: boolean;
+  DisplayFormat: number;
+  MaximumValue: number;
+  MinimumValue: number;
+  ShowAsPercentage: boolean;
+  Unit: any;
+  'odata.type': 'SP.FieldCurrency';
+}
+
+export interface FieldDateTime extends Field {
+  DateFormat: any;
   DateTimeCalendarType: number;
   DisplayFormat: number;
   FriendlyDisplayFormat: number;
+  TimeFormat: any;
   'odata.type': 'SP.FieldDateTime';
 }
 
-export interface FieldGeolocation extends FieldBase {
+export interface FieldGeolocation extends Field {
   'odata.type': 'SP.FieldGeolocation';
 }
 
-export interface FieldGuid extends FieldBase {
+export interface FieldGuid extends Field {
   'odata.type': 'SP.FieldGuid';
 }
 
-export interface FieldLookup extends FieldBase {
+export interface FieldLookup extends Field {
   AllowMultipleValues: boolean;
-  DependentLookupInternalNames: string[];
+  DependentLookupInternalNames: any[];
   IsDependentLookup: boolean;
   IsRelationship: boolean;
   LookupField: string;
@@ -168,14 +179,14 @@ export interface FieldLookup extends FieldBase {
   'odata.type': 'SP.FieldLookup';
 }
 
-export interface FieldMultiChoice extends FieldBase {
+export interface FieldMultiChoice extends Field {
   Choices: string[];
   FillInChoice: boolean;
   Mappings: any;
   'odata.type': 'SP.FieldMultiChoice';
 }
 
-export interface FieldMultiLineText extends FieldBase {
+export interface FieldMultiLineText extends Field {
   AllowHyperlink: boolean;
   AppendOnly: boolean;
   NumberOfLines: number;
@@ -186,25 +197,29 @@ export interface FieldMultiLineText extends FieldBase {
   'odata.type': 'SP.FieldMultiLineText';
 }
 
-export interface FieldNumber extends FieldBase {
+export interface FieldNumber extends Field {
+  CommaSeparator: boolean;
+  CustomUnitName: any;
+  CustomUnitOnRight: boolean;
   DisplayFormat: number;
   MaximumValue: number;
   MinimumValue: number;
   ShowAsPercentage: boolean;
+  Unit: any;
   'odata.type': 'SP.FieldNumber';
 }
 
-export interface FieldText extends FieldBase {
+export interface FieldText extends Field {
   MaxLength: number;
   'odata.type': 'SP.FieldText';
 }
 
-export interface FieldUrl extends FieldBase {
+export interface FieldUrl extends Field {
   DisplayFormat: number;
   'odata.type': 'SP.FieldUrl';
 }
 
-export interface FieldUser extends FieldBase {
+export interface FieldUser extends Field {
   AllowDisplay: boolean;
   AllowMultipleValues: boolean;
   DependentLookupInternalNames: any[];
@@ -222,7 +237,7 @@ export interface FieldUser extends FieldBase {
   'odata.type': 'SP.FieldUser';
 }
 
-export interface TaxonomyField extends FieldBase {
+export interface TaxonomyField extends Field {
   AllowMultipleValues: boolean;
   AnchorId: string;
   CreateValuesInEditForm: boolean;
@@ -249,21 +264,21 @@ export interface TaxonomyField extends FieldBase {
 }
 
 export interface IListFields {
-  Field: Field;
-  FieldText: FieldText;
-  FieldMultiLineText: FieldMultiLineText;
-  FieldUrl: FieldUrl;
-  FieldChoice: FieldChoice;
-  FieldLookup: FieldLookup;
-  TaxonomyField: TaxonomyField;
-  FieldUser: FieldUser;
-  FieldDateTime: FieldDateTime;
-  FieldMultiChoice: FieldMultiChoice;
-  FieldComputed: FieldComputed;
-  FieldNumber: FieldNumber;
-  FieldGuid: FieldGuid;
-  FieldGeolocation: FieldGeolocation;
   FieldCalculated: FieldCalculated;
+  FieldChoice: FieldChoice;
+  FieldComputed: FieldComputed;
+  FieldCurrency: FieldCurrency;
+  FieldDateTime: FieldDateTime;
+  FieldGeolocation: FieldGeolocation;
+  FieldGuid: FieldGuid;
+  FieldLookup: FieldLookup;
+  FieldMultiChoice: FieldMultiChoice;
+  FieldMultiLineText: FieldMultiLineText;
+  FieldNumber: FieldNumber;
+  FieldText: FieldText;
+  FieldUrl: FieldUrl;
+  FieldUser: FieldUser;
+  TaxonomyField: TaxonomyField;
 }
 
 export type IListField = IListFields[keyof IListFields];
