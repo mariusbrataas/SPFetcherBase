@@ -2,8 +2,17 @@ import { IList } from '@pnp/sp/presets/all';
 import { SPFetcherStructure } from './interfaces';
 import { SPFetcherUtils } from './SPFetcher.utils';
 
-function getDescription(description: string[]) {
-  return `/**${description.map(msg => `\n * ${msg}`).join('')}\n */`;
+function getDescription(descriptions: string[], prefix: string = '') {
+  return [
+    `/** ${descriptions[0]}`,
+    ...descriptions
+      .slice(1)
+      .filter(test => test && test.length)
+      .map(msg => ` * ${msg}`),
+    ` */`
+  ]
+    .map(msg => `${prefix}${msg}`)
+    .join('\n');
 }
 
 interface IDefinition {
@@ -11,6 +20,7 @@ interface IDefinition {
   interface_title: string;
   definition: string;
   imports: string[];
+  description: string[];
 }
 
 export class SPFetcherBuildInterfaces<
@@ -34,23 +44,35 @@ export class SPFetcherBuildInterfaces<
             fields.reduce(
               (prev, field) => ({
                 ...prev,
-                [field.InternalName]: field['odata.type']
-                  .split('.')
-                  .slice(-1)[0]
+                [field.InternalName]: {
+                  type: field['odata.type'].split('.').slice(-1)[0],
+                  description: getDescription(
+                    [
+                      `${field.InternalName} - [${field.Title}]`,
+                      ...(field.Description || '').split('\n')
+                    ],
+                    '  '
+                  )
+                }
               }),
-              {}
+              {} as {
+                [key: string]: { type: string; description: string };
+              }
             )
           )
           .then(r =>
             Promise.all([
               {
                 definition: Object.keys(r)
-                  .map(key => `\n  ${key}: ${r[key]};`)
+                  .map(
+                    key =>
+                      `\n\n${r[key].description}\n  ${key}: ${r[key].type};`
+                  )
                   .sort()
                   .join(''),
                 imports: Object.keys(
                   Object.keys(r).reduce(
-                    (prev, key) => ({ ...prev, [r[key]]: true }),
+                    (prev, key) => ({ ...prev, [r[key].type]: true }),
                     {}
                   )
                 )
@@ -58,16 +80,17 @@ export class SPFetcherBuildInterfaces<
               list
                 .select('Title', 'Description')
                 .get()
-                .then(({ Title, Description }) =>
-                  getDescription([Title, Description])
-                )
+                .then(({ Title, Description }) => [Title, Description])
             ])
           )
           .then(([{ definition, imports }, description]) => ({
             title,
             interface_title,
-            definition: `${description}\nexport interface ${interface_title} {${definition}\n}`,
-            imports
+            definition: `${getDescription(
+              description
+            )}\nexport interface ${interface_title} {${definition}\n}`,
+            imports,
+            description
           }))
       );
   }
@@ -105,26 +128,28 @@ export class SPFetcherBuildInterfaces<
             ).sort(),
             r
               .map(
-                ({ title: tmp_title, interface_title }) =>
-                  `\n  ${tmp_title}: ${interface_title};`
+                ({ title: tmp_title, interface_title, description }) =>
+                  `\n\n${getDescription(
+                    description,
+                    '  '
+                  )}\n  ${tmp_title}: ${interface_title};`
               )
               .sort()
               .join(''),
             this.Web(site as any)
               .then(web => web.select('Title', 'Description').get())
-              .then(({ Title, Description }) =>
-                getDescription([Title, Description])
-              )
+              .then(({ Title, Description }) => [Title, Description])
           ]).then(([imports, definition, description]) => ({
             title,
             interface_title,
             definition: `${r
               .map(typings => typings.definition)
               .sort()
-              .join(
-                '\n\n'
-              )}\n\n${description}\nexport interface ${interface_title} {${definition}\n}`,
-            imports
+              .join('\n\n')}\n\n${getDescription(
+              description
+            )}\nexport interface ${interface_title} {${definition}\n}`,
+            imports,
+            description
           }))
         )
       );
@@ -156,23 +181,27 @@ export class SPFetcherBuildInterfaces<
         ).sort(),
         r
           .map(
-            ({ title: tmp_title, interface_title }) =>
-              `\n  ${tmp_title}: ${interface_title};`
+            ({ title: tmp_title, interface_title, description }) =>
+              `\n\n${getDescription(
+                description,
+                '  '
+              )}\n  ${tmp_title}: ${interface_title};`
           )
           .sort()
           .join(''),
-        getDescription([`Project typings`])
+        [`Project typings`]
       ])
         .then(([imports, definition, description]) => ({
           definition: `${r
             .map(typings => typings.definition)
             .sort()
-            .join(
-              '\n\n'
-            )}\n\n${description}\nexport interface ${interface_title} {${definition}\n}`,
-          imports
+            .join('\n\n')}\n\n${getDescription(
+            description
+          )}\nexport interface ${interface_title} {${definition}\n}`,
+          imports,
+          description
         }))
-        .then(({ definition, imports }) => ({
+        .then(({ definition, imports, description }) => ({
           title,
           interface_title,
           definition: include_imports
@@ -182,7 +211,8 @@ export class SPFetcherBuildInterfaces<
                 imp => `\n  ${imp}`
               )}\n} from "spfetcherbase";\n\n${definition}`
             : definition,
-          imports
+          imports,
+          description
         }))
     );
   }
