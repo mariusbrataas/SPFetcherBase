@@ -1,15 +1,15 @@
-import { sp, IList, IField } from '@pnp/sp/presets/all';
 import {
-  SPHttpClient,
   ISPHttpClientOptions,
+  SPHttpClient,
   SPHttpClientConfiguration
 } from '@microsoft/sp-http';
+import { IField, IList, sp } from '@pnp/sp/presets/all';
 import {
-  IListField,
   FieldLookup,
+  IListField,
+  ItemType,
   ITerm,
-  SPFetcherStructure,
-  ItemType
+  SPFetcherStructure
 } from './interfaces';
 import { SPFetcherInitializer } from './SPFetcher.initializer';
 
@@ -255,6 +255,25 @@ export class SPFetcherUtils<
         });
         return r;
       });
+  }
+
+  /**
+   * Get list item references from RowAccessor items
+   *
+   * @param selected - RowAccessor[]
+   */
+  public getSelectedFiles(
+    selected: { getValueByName: (arg: string) => any }[]
+  ) {
+    return this.Web().then(web =>
+      Promise.all(
+        selected.map(row =>
+          web
+            .getFileByServerRelativePath(row.getValueByName('FileRef'))
+            .getItem()
+        )
+      )
+    );
   }
 
   /**
