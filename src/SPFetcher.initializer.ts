@@ -1,9 +1,9 @@
-import { sp, Web, IWeb, SPBatch } from '@pnp/sp/presets/all';
+import { IWeb, sp, SPBatch, Web } from '@pnp/sp/presets/all';
 import {
   BaseComponentContext,
-  SPFetcherStructure,
   IFetcherBaseProperties,
-  IFetcherPropertyTypes
+  IFetcherPropertyTypes,
+  SPFetcherStructure
 } from './interfaces';
 
 export class SPFetcherInitializer<T extends SPFetcherStructure> {
@@ -130,9 +130,12 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
    * Get a new web object for the given site.
    * Only to be used by utility methods.
    */
-  public Web(site: keyof SPFetcherInitializer<T>['sites'] = 'default') {
+  public Web(
+    site: keyof SPFetcherInitializer<T>['sites'] = 'default',
+    only_ready?: boolean
+  ) {
     if (!this.sites[site]) this.sites[site] = site;
-    return this.ready().then(
+    return this.ready(only_ready).then(
       () => (this.webs[site] = this.webs[site] || Web(this.sites[site]))
     );
   }
@@ -150,9 +153,13 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
    *   });
    * }
    */
-  protected ready(): Promise<void> {
+  protected ready(only_ready?: boolean): Promise<void> {
     return new Promise(resolve => {
-      if (this.status === 'ready' || this.status === 'initializing') {
+      if (
+        this.status === 'ready' || only_ready
+          ? false
+          : this.status === 'initializing'
+      ) {
         resolve();
       } else this.queue.push(resolve);
     });
