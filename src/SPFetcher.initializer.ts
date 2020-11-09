@@ -156,9 +156,8 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
   protected ready(only_ready?: boolean): Promise<void> {
     return new Promise(resolve => {
       if (
-        this.status === 'ready' || only_ready
-          ? false
-          : this.status === 'initializing'
+        this.status === 'ready' ||
+        (only_ready ? false : this.status === 'initializing')
       ) {
         resolve();
       } else this.queue.push(resolve);
