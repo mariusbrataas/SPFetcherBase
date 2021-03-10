@@ -72,7 +72,7 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
   public initialize(context: BaseComponentContext) {
     return new Promise(resolve => {
       if (this.status === 'initializing') {
-        this.queue.push(resolve);
+        this.queue.push(resolve as any);
       } else {
         this.status = 'initializing';
         this.context = context;
@@ -92,7 +92,7 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
         this.urls.base = this.sites.base;
 
         // Get new web object
-        this.Web().then(() => resolve());
+        this.Web().then(() => resolve(undefined));
       }
     })
       .then(() => this.startupRoutines())
@@ -153,7 +153,7 @@ export class SPFetcherInitializer<T extends SPFetcherStructure> {
    *   });
    * }
    */
-  protected ready(only_ready?: boolean): Promise<void> {
+  public ready(only_ready?: boolean): Promise<void> {
     return new Promise(resolve => {
       if (
         this.status === 'ready' ||
